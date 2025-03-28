@@ -61,7 +61,7 @@ class GameWindow(arcade.Window):
     def setup(self) -> None:
         """ Set up the game window.
         """
-        self.player_list = arcade.SpriteList()
+        self.player_list: arcade.SpriteList = arcade.SpriteList()
         self.player = Banjo()
 
         self.player.center_x = SCREEN_WIDTH // 2
@@ -80,28 +80,39 @@ class GameWindow(arcade.Window):
             delta_time: float
         ) -> None:
 
-        self.player_list.update_animation()
+        self.player_list.update_animation(delta_time)
 
         if self.d_pressed:
-            self.player.death()
+            self.player.current_animation = "death"
+            return
+
+        if self.m_pressed:
+            self.player.current_animation = "melee"
+            return
+
+        if self.b_pressed:
+            self.player.current_animation = "bark"
             return
 
         if self.left_pressed and not self.right_pressed:
+            if self.player.character_face_direction == 0:
+                self.player.turn()
+
+            self.player.current_animation = "walk"
             self.physics_engine.set_velocity(self.player, (-WALKING_VELOCITY, 0))
 
         elif self.right_pressed and not self.left_pressed:
+            if self.player.character_face_direction == 1:
+                self.player.turn()
+
+            self.player.current_animation = "walk"
             self.physics_engine.set_velocity(self.player, (WALKING_VELOCITY, 0))
 
         # Stop the player if no key is being pressed
         else:
             self.physics_engine.set_velocity(self.player, (0, 0))
-            self.player.texture = self.player.walk_textures[0][self.player.character_face_direction]
+            self.player.current_animation = "idle"
 
-        if self.m_pressed:
-            self.player.melee()
-
-        if self.b_pressed:
-            self.player.bark()
 
         self.physics_engine.step()
 

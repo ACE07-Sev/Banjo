@@ -5,16 +5,14 @@ __all__ = ["Soldier2"]
 import arcade
 
 # Constants
-DEAD_ZONE = 0.001
 RIGHT_FACING = 0
 LEFT_FACING = 1
-DISTANCE_TO_CHANGE_TEXTURE = 1
 
 # Soldier 2 Constants
-WALKING_VELOCITY = 800
-RUNNING_VELOCITY = 1200
+WALKING_VELOCITY = 100
+RUNNING_VELOCITY = 200
 HEALTH_POINTS = 30
-ACCURACY = 0.85
+ACCURACY = 0.7
 VISION_RANGE = 800
 
 # FAMAS Constants
@@ -28,23 +26,46 @@ SHOOTING_SOUND = arcade.load_sound("sounds/snd_shooting.wav")
 SHELL_SOUND = arcade.load_sound("sounds/snd_bullet_shell.wav")
 
 PATH_CONSTANT = "sprites/soldier_2/"
-SOLDIER_2_IDLE = PATH_CONSTANT + "Idle.png"
-SOLDIER_2_WALK = PATH_CONSTANT + "Walk.png"
-SOLDIER_2_RUN = PATH_CONSTANT + "Run.png"
-SOLDIER_2_MELEE = PATH_CONSTANT + "Melee.png"
-SOLDIER_2_CROUCH_FIRE = PATH_CONSTANT + "Crouched_shooting.png"
-SOLDIER_2_AIM_FIRE = PATH_CONSTANT + "Aimed_down_shooting.png"
-SOLDIER_2_HURT = PATH_CONSTANT + "Hurt.png"
-SOLDIER_2_DEATH = PATH_CONSTANT + "Death.png"
+IDLE = PATH_CONSTANT + "Idle.png"
+WALK = PATH_CONSTANT + "Walk.png"
+RUN = PATH_CONSTANT + "Run.png"
+MELEE = PATH_CONSTANT + "Melee.png"
+CROUCH_FIRE = PATH_CONSTANT + "Crouched_shooting.png"
+AIM_FIRE = PATH_CONSTANT + "Aimed_down_shooting.png"
+RELOAD = PATH_CONSTANT + "Reload.png"
+HURT = PATH_CONSTANT + "Hurt.png"
+DEATH = PATH_CONSTANT + "Death.png"
 
-SOLDIER_2_IDLE_SPRITESHEET = arcade.load_spritesheet(SOLDIER_2_IDLE)
-SOLDIER_2_WALK_SPRITESHEET = arcade.load_spritesheet(SOLDIER_2_WALK)
-SOLDIER_2_RUN_SPRITESHEET = arcade.load_spritesheet(SOLDIER_2_RUN)
-SOLDIER_2_MELEE_SPRITESHEET = arcade.load_spritesheet(SOLDIER_2_MELEE)
-SOLDIER_2_CROUCH_FIRE_SPRITESHEET = arcade.load_spritesheet(SOLDIER_2_CROUCH_FIRE)
-SOLDIER_2_AIM_FIRE_SPRITESHEET = arcade.load_spritesheet(SOLDIER_2_AIM_FIRE)
-SOLDIER_2_HURT_SPRITESHEET = arcade.load_spritesheet(SOLDIER_2_HURT)
-SOLDIER_2_DEATH_SPRITESHEET = arcade.load_spritesheet(SOLDIER_2_DEATH)
+IDLE_SPRITESHEET = arcade.load_spritesheet(IDLE)
+WALK_SPRITESHEET = arcade.load_spritesheet(WALK)
+RUN_SPRITESHEET = arcade.load_spritesheet(RUN)
+MELEE_SPRITESHEET = arcade.load_spritesheet(MELEE)
+CROUCH_FIRE_SPRITESHEET = arcade.load_spritesheet(CROUCH_FIRE)
+AIM_FIRE_SPRITESHEET = arcade.load_spritesheet(AIM_FIRE)
+RELOAD_SPRITESHEET = arcade.load_spritesheet(RELOAD)
+HURT_SPRITESHEET = arcade.load_spritesheet(HURT)
+DEATH_SPRITESHEET = arcade.load_spritesheet(DEATH)
+
+TEXTURE_CANVAS = (256, 128)
+IDLE_TEXTURE_GRID = IDLE_SPRITESHEET.get_texture_grid(TEXTURE_CANVAS, 9, 9)
+WALK_TEXTURE_GRID = WALK_SPRITESHEET.get_texture_grid(TEXTURE_CANVAS, 8, 8)
+RUN_TEXTURE_GRID = RUN_SPRITESHEET.get_texture_grid(TEXTURE_CANVAS, 8, 8)
+MELEE_TEXTURE_GRID = MELEE_SPRITESHEET.get_texture_grid(TEXTURE_CANVAS, 4, 4)
+CROUCHED_FIRE_TEXTURE_GRID = CROUCH_FIRE_SPRITESHEET.get_texture_grid(TEXTURE_CANVAS, 7, 7)
+AIM_FIRE_TEXTURE_GRID = AIM_FIRE_SPRITESHEET.get_texture_grid(TEXTURE_CANVAS, 7, 7)
+RELOAD_TEXTURE_GRID = RELOAD_SPRITESHEET.get_texture_grid(TEXTURE_CANVAS, 8, 8)
+HURT_TEXTURE_GRID = HURT_SPRITESHEET.get_texture_grid(TEXTURE_CANVAS, 3, 3)
+DEATH_TEXTURE_GRID = DEATH_SPRITESHEET.get_texture_grid(TEXTURE_CANVAS, 9, 9)
+
+IDLE_TEXTURES = [(texture, texture.flip_left_right()) for texture in IDLE_TEXTURE_GRID]
+WALK_TEXTURES = [(texture, texture.flip_left_right()) for texture in WALK_TEXTURE_GRID]
+RUN_TEXTURES = [(texture, texture.flip_left_right()) for texture in RUN_TEXTURE_GRID]
+MELEE_TEXTURES = [(texture, texture.flip_left_right()) for texture in MELEE_TEXTURE_GRID]
+CROUCHED_FIRE_TEXTURES = [(texture, texture.flip_left_right()) for texture in CROUCHED_FIRE_TEXTURE_GRID]
+AIM_FIRE_TEXTURES = [(texture, texture.flip_left_right()) for texture in AIM_FIRE_TEXTURE_GRID]
+RELOAD_TEXTURES = [(texture, texture.flip_left_right()) for texture in RELOAD_TEXTURE_GRID]
+HURT_TEXTURES = [(texture, texture.flip_left_right()) for texture in HURT_TEXTURE_GRID]
+DEATH_TEXTURES = [(texture, texture.flip_left_right()) for texture in DEATH_TEXTURE_GRID]
 
 
 class Soldier2(arcade.Sprite):
@@ -77,61 +98,36 @@ class Soldier2(arcade.Sprite):
 
     Attributes
     ----------
-    `idle_textures` : list[tuple[arcade.Texture, arcade.Texture]]
-        A list of tuples where each tuple contains a texture facing
-        left and a texture facing right. These textures are used
-        for the idle animation.
-    `walk_textures` : list[tuple[arcade.Texture, arcade.Texture]]
-        A list of tuples where each tuple contains a texture facing
-        left and a texture facing right. These textures are used
-        for the walking animation.
-    `run_textures` : list[tuple[arcade.Texture, arcade.Texture]]
-        A list of tuples where each tuple contains a texture facing
-        left and a texture facing right. These textures are used
-        for the running animation.
-    `melee_textures` : list[tuple[arcade.Texture, arcade.Texture]]
-        A list of tuples where each tuple contains a texture facing
-        left and a texture facing right. These textures are used
-        for the melee attack animation.
-    `crouch_fire_textures` : list[tuple[arcade.Texture, arcade.Texture]]
-        A list of tuples where each tuple contains a texture facing
-        left and a texture facing right. These textures are used
-        for the crouch fire shooting animation.
-    `aim_fire_textures` : list[tuple[arcade.Texture, arcade.Texture]]
-        A list of tuples where each tuple contains a texture facing
-        left and a texture facing right. These textures are used
-        for the aim fire shooting animation.
-    `hurt_textures` : list[tuple[arcade.Texture, arcade.Texture]]
-        A list of tuples where each tuple contains a texture facing
-        left and a texture facing right. These textures are used
-        for the hurt animation.
-    `death_textures` : list[tuple[arcade.Texture, arcade.Texture]]
-        A list of tuples where each tuple contains a texture facing
-        left and a texture facing right. These textures are used
-        for the death animation.
-    `texture` : arcade.Texture
-        The current texture being displayed.
-    `is_idle` : bool
-        A boolean representing whether the NPC is idle.
+    `texture_dict` : dict
+        A dictionary containing the texture grids for each animation
+        state of the soldier.
+    `is_run` : bool
+        A boolean representing whether the soldier is running or not.
     `hp` : int
-        The amount of health points the NPC has.
+        The health points of the soldier.
     `attack` : int
-        The amount of damage the NPC deals.
-    `accuracy` : float
-        The accuracy of the NPC's attacks.
+        The damage dealt by the soldier's weapon.
     `magazine` : int
-        The number of rounds the NPC has left in their magazine.
+        The maximum number of rounds in the soldier's magazine.
+    `current_mag` : int
+        The current number of rounds in the soldier's magazine.
+    `accuracy` : float
+        The accuracy of the soldier's weapon.
     `range` : int
-        The range of the NPC's vision.
-    `running` : bool
-        A boolean representing whether the NPC is running.
+        The range of the soldier's weapon.
+    `texture` : arcade.Texture
+        The current texture of the soldier.
     `character_face_direction` : int
-        An integer representing which direction the NPC is facing.
-        0 for right, 1 for left.
-    `current_texture` : int
-        The index of the current texture being displayed.
-    `x_odometer` : float
-        How far the NPC has moved horizontally since the last texture change.
+        The direction the soldier is facing. 0 for right, 1 for left.
+    `current_animation` : str
+        The current animation state of the soldier.
+    `current_texture_index` : int
+        The index of the current texture in the animation state.
+    `time_since_last_frame` : float
+        The time since the last frame was updated.
+    `animation_fps` : dict
+        A dictionary containing the frames per second for each
+        animation state of the soldier.
 
     Usage
     -----
@@ -140,79 +136,95 @@ class Soldier2(arcade.Sprite):
     def __init__(self) -> None:
         """ Initialize the Soldier 2 NPC.
         """
-        super().__init__(scale=1)
+        super().__init__(scale=1.5)
 
-        idle_textures = SOLDIER_2_IDLE_SPRITESHEET.get_texture_grid((128, 128), 9, 9)
-        walk_textures = SOLDIER_2_WALK_SPRITESHEET.get_texture_grid((128, 128), 8, 8)
-        run_textures = SOLDIER_2_RUN_SPRITESHEET.get_texture_grid((128, 128), 8, 8)
-        melee_textures = SOLDIER_2_MELEE_SPRITESHEET.get_texture_grid((128, 128), 4, 4)
-        crouch_fire_textures = SOLDIER_2_CROUCH_FIRE_SPRITESHEET.get_texture_grid((128, 128), 7, 7)
-        aim_fire_textures = SOLDIER_2_AIM_FIRE_SPRITESHEET.get_texture_grid((128, 128), 7, 7)
-        hurt_textures = SOLDIER_2_HURT_SPRITESHEET.get_texture_grid((128, 128), 3, 3)
-        death_textures = SOLDIER_2_DEATH_SPRITESHEET.get_texture_grid((256, 128), 9, 9)
+        self.texture_dict = {
+            "idle": IDLE_TEXTURES,
+            "walk": WALK_TEXTURES,
+            "run": RUN_TEXTURES,
+            "melee": MELEE_TEXTURES,
+            "aim_fire": AIM_FIRE_TEXTURES,
+            "crouch_fire": CROUCHED_FIRE_TEXTURES,
+            "reload": RELOAD_TEXTURES,
+            "hurt": HURT_TEXTURES,
+            "death": DEATH_TEXTURES
+        }
 
-        self.idle_textures = [(texture, texture.flip_left_right()) for texture in idle_textures]
-        self.walk_textures = [(texture, texture.flip_left_right()) for texture in walk_textures]
-        self.run_textures = [(texture, texture.flip_left_right()) for texture in run_textures]
-        self.melee_textures = [(texture, texture.flip_left_right()) for texture in melee_textures]
-        self.crouch_fire_textures = [(texture, texture.flip_left_right()) for texture in crouch_fire_textures]
-        self.aim_fire_textures = [(texture, texture.flip_left_right()) for texture in aim_fire_textures]
-        self.hurt_textures = [(texture, texture.flip_left_right()) for texture in hurt_textures]
-        self.death_textures = [(texture, texture.flip_left_right()) for texture in death_textures]
-
-        self.is_idle = True
+        self.is_run = False
         self.hp = HEALTH_POINTS
         self.attack = FAMAS_DAMAGE
         self.magazine = FAMAS_MAG
+        self.current_mag = FAMAS_MAG
         self.accuracy = ACCURACY
         self.range = VISION_RANGE
 
-        self.running = False
-        self.texture = self.walk_textures[0][0]
+        self.texture = self.texture_dict["walk"][0][0]
         self.character_face_direction = RIGHT_FACING
-        self.current_texture = 0
-        self.x_odometer = 0
+        self.current_animation = "idle"
+        self.current_texture_index = 0
+
+        # FPS control variables
+        self.time_since_last_frame = 0.0
+        self.animation_fps = {
+            "idle": 1/6,
+            "walk": 1/8,
+            "run": 1/12,
+            "turn": 1/2,
+            "melee": 1/6,
+            "hip_fire": 1/16,
+            "aim_fire": 1/16,
+            "crouch_fire": 1/16,
+            "reload": 1/3,
+            "hurt": 1/4,
+            "death": 1/2
+        }
 
     def idle(self) -> None:
         """ Play the idle animation.
 
         Usage
         -----
-        >>> soldier_2.idle()
+        >>> soldier_1.idle()
         """
-        if self.current_texture > 8:
-            self.current_texture = 0
-        self.texture = self.idle_textures[self.current_texture][self.character_face_direction]
-        self.current_texture += 1
+        current_texture = self.texture_dict[self.current_animation]
+
+        if self.current_texture_index > len(current_texture) - 1:
+            self.current_texture_index = 0
+
+        self.texture = current_texture[self.current_texture_index][self.character_face_direction]
+        self.current_texture_index += 1
 
     def walk(self) -> None:
         """ Play the walking animation.
 
         Usage
         -----
-        >>> soldier_2.walk()
+        >>> soldier_1.walk()
         """
-        if self.current_texture > 7:
-            self.current_texture = 0
-        self.texture = self.walk_textures[self.current_texture][self.character_face_direction]
-        self.current_texture += 1
+        current_texture = self.texture_dict[self.current_animation]
+
+        if self.current_texture_index > len(current_texture) - 1:
+            self.current_texture_index = 0
+
+        self.texture = current_texture[self.current_texture_index][self.character_face_direction]
+        self.current_texture_index += 1
 
     def run(self) -> None:
         """ Play the running animation.
 
         Usage
         -----
-        >>> soldier_2.run()
+        >>> soldier_1.run()
         """
-        if self.current_texture > 7:
-            self.current_texture = 0
-        self.texture = self.run_textures[self.current_texture][self.character_face_direction]
-        self.current_texture += 1
+        current_texture = self.texture_dict[self.current_animation]
 
-    def turn(
-            self,
-            direction: int
-        ) -> None:
+        if self.current_texture_index > len(current_texture) - 1:
+            self.current_texture_index = 0
+
+        self.texture = current_texture[self.current_texture_index][self.character_face_direction]
+        self.current_texture_index += 1
+
+    def turn(self) -> None:
         """ Play the turning animation.
 
         Parameters
@@ -224,109 +236,138 @@ class Soldier2(arcade.Sprite):
         -----
         >>> player.turn(0)
         """
-        self.character_face_direction = direction
-        self.texture = self.idle_textures[0][self.character_face_direction]
+        self.character_face_direction = abs(self.character_face_direction - 1)
+        self.texture = IDLE_TEXTURES[0][self.character_face_direction]
 
     def melee(self) -> None:
         """ Play the melee attack animation.
 
         Usage
         -----
-        >>> soldier_2.melee()
+        >>> soldier_1.melee()
         """
-        self.is_idle = False
-        if self.current_texture > 2:
-            self.current_texture = 0
-        self.texture = self.melee_textures[self.current_texture][self.character_face_direction]
-        self.current_texture += 1
+        current_texture = self.texture_dict[self.current_animation]
 
-    def crouch_fire(self) -> None:
-        """ Play the crouch fire shooting animation.
+        if self.current_texture_index > len(current_texture) - 1:
+            self.current_texture_index = 0
 
-        Usage
-        -----
-        >>> soldier_2.crouch_fire()
-        """
-        self.is_idle = False
-        if self.current_texture > 5:
-            self.current_texture = 0
-        self.texture = self.crouch_fire_textures[self.current_texture][self.character_face_direction]
-        if self.current_texture == 3:
-            arcade.play_sound(SHOOTING_SOUND)
-        if self.current_texture == 5:
-            arcade.play_sound(SHELL_SOUND)
-        self.current_texture += 1
+        self.texture = current_texture[self.current_texture_index][self.character_face_direction]
+        self.current_texture_index += 1
 
     def aim_fire(self) -> None:
         """ Play the aim fire shooting animation.
 
         Usage
         -----
-        >>> soldier_2.aim_fire()
+        >>> soldier_1.aim_fire()
         """
-        self.is_idle = False
-        if self.current_texture > 5:
-            self.current_texture = 0
-        self.texture = self.aim_fire_textures[self.current_texture][self.character_face_direction]
-        if self.current_texture == 3:
+        current_texture = self.texture_dict[self.current_animation]
+
+        if self.current_texture_index > len(current_texture) - 1:
+            self.current_mag -= 1
+            if self.current_mag == 0:
+                self.reload()
+                return
+            self.current_texture_index = 0
+
+        self.texture = current_texture[self.current_texture_index][self.character_face_direction]
+
+        if self.current_texture_index == 2:
             arcade.play_sound(SHOOTING_SOUND)
-        if self.current_texture == 5:
+        if self.current_texture_index == 4:
             arcade.play_sound(SHELL_SOUND)
-        self.current_texture += 1
+        if self.current_texture_index == 5:
+            arcade.play_sound(SHELL_SOUND, volume=0.8)
+
+        self.current_texture_index += 1
+
+    def crouch_fire(self) -> None:
+        """ Play the crouched fire shooting animation.
+
+        Usage
+        -----
+        >>> soldier_1.crouch_fire()
+        """
+        current_texture = self.texture_dict[self.current_animation]
+
+        if self.current_texture_index > len(current_texture) - 1:
+            self.current_mag -= 1
+            if self.current_mag == 0:
+                self.reload()
+                return
+            self.current_texture_index = 0
+
+        self.texture = current_texture[self.current_texture_index][self.character_face_direction]
+
+        if self.current_texture_index == 2:
+            arcade.play_sound(SHOOTING_SOUND)
+        if self.current_texture_index == 4:
+            arcade.play_sound(SHELL_SOUND)
+        if self.current_texture_index == 5:
+            arcade.play_sound(SHELL_SOUND, volume=0.8)
+
+        self.current_texture_index += 1
+
+    def reload(self) -> None:
+        """ Reload the magazine.
+
+        Usage
+        -----
+        >>> soldier_1.reload()
+        """
+        current_texture = self.texture_dict[self.current_animation]
+
+        if self.current_texture_index > len(current_texture) - 1:
+            self.current_mag = self.magazine
+            return
+
+        self.texture = current_texture[self.current_texture_index][self.character_face_direction]
+        self.current_texture_index += 1
 
     def hurt(self) -> None:
         """ Play the hurt animation.
 
         Usage
         -----
-        >>> soldier_2.hurt()
+        >>> soldier_1.hurt()
         """
-        self.is_idle = False
-        if self.current_texture > 2:
-            self.current_texture = 0
-        self.texture = self.hurt_textures[self.current_texture][self.character_face_direction]
-        self.current_texture += 1
+        current_texture = self.texture_dict[self.current_animation]
+
+        if self.current_texture_index > len(current_texture) - 1:
+            self.current_texture_index = 0
+
+        self.texture = current_texture[self.current_texture_index][self.character_face_direction]
+        self.current_texture_index += 1
 
     def death(self) -> None:
         """ Play the death animation.
 
         Usage
         -----
-        >>> soldier_2.death()
+        >>> soldier_1.death()
         """
-        self.is_idle = False
-        if self.current_texture > 8:
-            return
-        self.texture = self.death_textures[self.current_texture][self.character_face_direction]
-        self.current_texture += 1
+        current_texture = self.texture_dict[self.current_animation]
 
-    def pymunk_moved(
+        self.hp = 0
+
+        if self.current_texture_index > len(current_texture) - 1:
+            return
+
+        self.texture = current_texture[self.current_texture_index][self.character_face_direction]
+        self.current_texture_index += 1
+
+    def update_animation(
             self,
-            physics_engine: arcade.PymunkPhysicsEngine,
-            dx: float,
-            dy: float,
-            d_angle: float
+            delta_time: float=1/60,
+            *args,
+            **kwargs
         ) -> None:
 
         if self.hp == 0:
             return
 
-        if abs(dx) <= DEAD_ZONE and self.is_idle:
-            self.idle()
-            return
+        self.time_since_last_frame += delta_time
 
-        if dx < -DEAD_ZONE and self.character_face_direction == RIGHT_FACING:
-            self.turn(LEFT_FACING)
-            return
-        elif dx > DEAD_ZONE and self.character_face_direction == LEFT_FACING:
-            self.turn(RIGHT_FACING)
-            return
-
-        self.x_odometer += dx
-
-        if abs(self.x_odometer) > DISTANCE_TO_CHANGE_TEXTURE:
-            self.x_odometer = 0
-            if self.running:
-                self.run()
-            else:
-                self.walk()
+        if self.time_since_last_frame >= self.animation_fps[self.current_animation]:
+            getattr(self, self.current_animation)()
+            self.time_since_last_frame = 0

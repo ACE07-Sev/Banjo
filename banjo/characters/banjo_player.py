@@ -5,26 +5,46 @@ __all__ = ["Banjo"]
 import arcade
 
 # Constants
-DEAD_ZONE = 0.01
 RIGHT_FACING = 0
 LEFT_FACING = 1
-DISTANCE_TO_CHANGE_TEXTURE = 3
-WALKING_VELOCITY = 1000
+
+# Banjo Constants
+HP = 100
+ATTACK = 10
+HUNGER_RATE = 0.1
+DRYING_RATE = 0.1
+WALKING_VELOCITY = 200
+
+BANJO_BARK_SOUND = "sounds/banjo_bark.wav"
 
 PATH_CONSTANT = "sprites/banjo/"
-BANJO_IDLE = PATH_CONSTANT + "Banjo_idle.png"
-BANJO_WALK = PATH_CONSTANT + "Banjo_walk.png"
-BANJO_TURN = PATH_CONSTANT + "Banjo_turn.png"
-BANJO_BARK = PATH_CONSTANT + "Banjo_bark.png"
-BANJO_MELEE = PATH_CONSTANT + "Banjo_melee.png"
-BANJO_DEATH = PATH_CONSTANT + "Banjo_death.png"
+IDLE = PATH_CONSTANT + "Banjo_idle.png"
+WALK = PATH_CONSTANT + "Banjo_walk.png"
+TURN = PATH_CONSTANT + "Banjo_turn.png"
+BARK = PATH_CONSTANT + "Banjo_bark.png"
+MELEE = PATH_CONSTANT + "Banjo_melee.png"
+DEATH = PATH_CONSTANT + "Banjo_death.png"
 
-BANJO_IDLE_SPRITESHEET = arcade.load_spritesheet(BANJO_IDLE)
-BANJO_WALKING_SPRITESHEET = arcade.load_spritesheet(BANJO_WALK)
-BANJO_TURN_SPRITE = arcade.load_texture(BANJO_TURN)
-BANJO_BARKING_SPRITESHEET = arcade.load_spritesheet(BANJO_BARK)
-BANJO_MELEE_SPRITESHEET = arcade.load_spritesheet(BANJO_MELEE)
-BANJO_DEATH_SPRITESHEET = arcade.load_spritesheet(BANJO_DEATH)
+IDLE_SPRITESHEET = arcade.load_spritesheet(IDLE)
+WALKING_SPRITESHEET = arcade.load_spritesheet(WALK)
+TURN_SPRITE = arcade.load_texture(TURN)
+BARKING_SPRITESHEET = arcade.load_spritesheet(BARK)
+MELEE_SPRITESHEET = arcade.load_spritesheet(MELEE)
+DEATH_SPRITESHEET = arcade.load_spritesheet(DEATH)
+
+IDLE_TEXTURE_GRID = IDLE_SPRITESHEET.get_texture_grid((200, 200), 4, 4)
+WALK_TEXTURE_GRID = WALKING_SPRITESHEET.get_texture_grid((200, 200), 5, 5)
+TURN_TEXTURE_GRID = TURN_SPRITE
+BARK_TEXTURE_GRID = BARKING_SPRITESHEET.get_texture_grid((200, 200), 5, 5)
+MELEE_TEXTURE_GRID = MELEE_SPRITESHEET.get_texture_grid((200, 200), 7, 7)
+DEATH_TEXTURE_GRID = DEATH_SPRITESHEET.get_texture_grid((220, 240), 10, 10)
+
+IDLE_TEXTURES = [(texture, texture.flip_left_right()) for texture in IDLE_TEXTURE_GRID]
+WALK_TEXTURES = [(texture, texture.flip_left_right()) for texture in WALK_TEXTURE_GRID]
+TURN_TEXTURE = [(TURN_TEXTURE_GRID, TURN_TEXTURE_GRID.flip_left_right())]
+BARK_TEXTURES = [(texture, texture.flip_left_right()) for texture in BARK_TEXTURE_GRID]
+MELEE_TEXTURES = [(texture, texture.flip_left_right()) for texture in MELEE_TEXTURE_GRID]
+DEATH_TEXTURES = [(texture, texture.flip_left_right()) for texture in DEATH_TEXTURE_GRID]
 
 
 class Banjo(arcade.Sprite):
@@ -57,44 +77,58 @@ class Banjo(arcade.Sprite):
 
     Attributes
     ----------
-    `idle_textures` : list[tuple[arcade.Texture, arcade.Texture]]
-        A list of tuples where each tuple contains a texture facing
-        left and a texture facing right. These textures are used
-        for the idle animation.
-    `walk_textures` : list[tuple[arcade.Texture, arcade.Texture]]
-        A list of tuples where each tuple contains a texture facing
-        left and a texture facing right. These textures are used
-        for the walking animation.
-    `turn_texture` : tuple[arcade.Texture, arcade.Texture]
-        A tuple containing a texture facing left and a texture facing
-        right. These textures are used for the turning animation.
-    `bark_textures` : list[tuple[arcade.Texture, arcade.Texture]]
-        A list of tuples where each tuple contains a texture facing
-        left and a texture facing right. These textures are used
-        for the barking animation.
-    `melee_textures` : list[tuple[arcade.Texture, arcade.Texture]]
-        A list of tuples where each tuple contains a texture facing
-        left and a texture facing right. These textures are used
-        for the melee attack animation.
-    `death_textures` : list[tuple[arcade.Texture, arcade.Texture]]
-        A list of tuples where each tuple contains a texture facing
-        left and a texture facing right. These textures are used
-        for the death animation.
-    `not_idle` : bool
-        A boolean representing whether the player is idle or not.
+    `texture_dict` : dict[str, list[tuple[arcade.Texture, arcade.Texture]]]
+        The dictionary that contains the textures for the player
+        character. The keys are the names of the animations and
+        the values are lists of tuples containing the texture and
+        its flipped version.
     `hp` : int
-        The player's health points.
+        The health points of the player character. The player
+        character starts with 100 health points.
     `attack` : int
-        The player's attack power.
+        The attack points of the player character. The player
+        character starts with 10 attack points.
+    `hunger_rate` : float
+        The rate at which the player character gets hungry.
+        The player character starts with 0 hunger points.
+    `current_hunger` : int
+        The current hunger points of the player character.
+        The player character starts with 0 hunger points.
+    `max_hunger` : int
+        The maximum hunger points of the player character.
+        The player character starts with 3 hunger points.
+    `drying_rate` : float
+        The rate at which the player character gets dry.
+        The player character starts with 0 dryness points.
+    `current_dryness` : int
+        The current dryness points of the player character.
+        The player character starts with 0 dryness points.
+    `max_dryness` : int
+        The maximum dryness points of the player character.
+        The player character starts with 3 dryness points.
+    `walking_velocity` : int
+        The walking velocity of the player character.
+        The player character starts with a velocity of 200.
     `texture` : arcade.Texture
-        The current texture being displayed for the player.
+        The texture of the player character. The player
+        character starts with the walking texture.
     `character_face_direction` : int
-        An integer representing which direction the player is facing.
-        0 for right, 1 for left.
-    `current_texture` : int
-        The index of the current texture being displayed.
-    `x_odometer` : float
-        How far the player has moved horizontally since the last texture change.
+        The direction the player character is facing.
+        The player character starts facing right.
+    `current_animation` : str
+        The current animation of the player character.
+        The player character starts with the idle animation.
+    `current_texture_index` : int
+        The current texture index of the player character.
+        The player character starts with the first texture
+        in the idle animation.
+    `time_since_last_frame` : float
+        The time since the last frame was drawn. This is
+        used to control the FPS of the animation.
+    `animation_fps` : dict[str, float]
+        The FPS of the animations. The keys are the names
+        of the animations and the values are the FPS of
+        the animations.
 
     Usage
     -----
@@ -103,58 +137,75 @@ class Banjo(arcade.Sprite):
     def __init__(self) -> None:
         """ Initialize the player character.
         """
-        super().__init__(scale=1)
+        super().__init__(scale=1.5)
 
-        idle_textures = BANJO_IDLE_SPRITESHEET.get_texture_grid((200, 200), 4, 4)
-        walk_textures = BANJO_WALKING_SPRITESHEET.get_texture_grid((200, 200), 5, 5)
-        turn_texture = BANJO_TURN_SPRITE
-        bark_textures = BANJO_BARKING_SPRITESHEET.get_texture_grid((200, 200), 5, 5)
-        melee_textures = BANJO_MELEE_SPRITESHEET.get_texture_grid((200, 200), 7, 7)
-        death_textures = BANJO_DEATH_SPRITESHEET.get_texture_grid((220, 240), 10, 10)
+        self.texture_dict = {
+            "idle": IDLE_TEXTURES,
+            "walk": WALK_TEXTURES,
+            "turn": TURN_TEXTURE,
+            "bark": BARK_TEXTURES,
+            "melee": MELEE_TEXTURES,
+            "death": DEATH_TEXTURES
+        }
 
-        self.idle_textures = [(texture, texture.flip_left_right()) for texture in idle_textures]
-        self.walk_textures = [(texture, texture.flip_left_right()) for texture in walk_textures]
-        self.turn_texture = (turn_texture, turn_texture.flip_left_right())
-        self.bark_textures = [(texture, texture.flip_left_right()) for texture in bark_textures]
-        self.melee_textures = [(texture, texture.flip_left_right()) for texture in melee_textures]
-        self.death_textures = [(texture, texture.flip_left_right()) for texture in death_textures]
+        # Banjo gameplay stats
+        self.hp = HP
+        self.attack = ATTACK
+        self.hunger_rate = HUNGER_RATE
+        self.current_hunger = 0
+        self.max_hunger = 3
+        self.drying_rate = DRYING_RATE
+        self.current_dryness = 0
+        self.max_dryness = 3
+        self.walking_velocity = WALKING_VELOCITY
 
-        self.not_idle = False
-        self.hp = 100
-        self.attack = 10
-        self.texture = self.walk_textures[0][0]
+        self.texture = self.texture_dict["walk"][0][0]
         self.character_face_direction = RIGHT_FACING
-        self.current_texture = 0
-        self.x_odometer = 0
+        self.current_animation = "idle"
+        self.current_texture_index = 0
+
+        # FPS control variables
+        self.time_since_last_frame = 0.0
+        self.animation_fps = {
+            "idle": 1/6,
+            "walk": 1/8,
+            "turn": 1/2,
+            "bark": 1/5,
+            "melee": 1/6,
+            "death": 1/2
+        }
 
     def idle(self) -> None:
         """ Play the idle animation.
 
         Usage
         -----
-        >>> player.idle()
+        >>> soldier_1.idle()
         """
-        if self.current_texture > 3:
-            self.current_texture = 0
-        self.texture = self.idle_textures[self.current_texture][self.character_face_direction]
-        self.current_texture += 1
+        current_texture = self.texture_dict[self.current_animation]
+
+        if self.current_texture_index > len(current_texture) - 1:
+            self.current_texture_index = 0
+
+        self.texture = current_texture[self.current_texture_index][self.character_face_direction]
+        self.current_texture_index += 1
 
     def walk(self) -> None:
         """ Play the walking animation.
 
         Usage
         -----
-        >>> player.walk()
+        >>> soldier_1.walk()
         """
-        if self.current_texture > 4:
-            self.current_texture = 0
-        self.texture = self.walk_textures[self.current_texture][self.character_face_direction]
-        self.current_texture += 1
+        current_texture = self.texture_dict[self.current_animation]
 
-    def turn(
-            self,
-            direction: int
-        ) -> None:
+        if self.current_texture_index > len(current_texture) - 1:
+            self.current_texture_index = 0
+
+        self.texture = current_texture[self.current_texture_index][self.character_face_direction]
+        self.current_texture_index += 1
+
+    def turn(self) -> None:
         """ Play the turning animation.
 
         Parameters
@@ -166,8 +217,8 @@ class Banjo(arcade.Sprite):
         -----
         >>> player.turn(0)
         """
-        self.character_face_direction = direction
-        self.texture = self.turn_texture[abs(direction - 1)]
+        self.character_face_direction = abs(self.character_face_direction - 1)
+        self.texture = self.texture_dict[self.current_animation][0][self.character_face_direction]
 
     def bark(self) -> None:
         """ Play the barking animation.
@@ -176,11 +227,17 @@ class Banjo(arcade.Sprite):
         -----
         >>> player.bark()
         """
-        self.not_idle = True
-        if self.current_texture > 4:
-            self.current_texture = 0
-        self.texture = self.bark_textures[self.current_texture][self.character_face_direction]
-        self.current_texture += 1
+        current_texture = self.texture_dict[self.current_animation]
+
+        if self.current_texture_index > len(current_texture) - 1:
+            self.current_texture_index = 0
+
+        self.texture = current_texture[self.current_texture_index][self.character_face_direction]
+
+        if self.current_texture_index == 2:
+            arcade.play_sound(arcade.load_sound(BANJO_BARK_SOUND))
+
+        self.current_texture_index += 1
 
     def melee(self) -> None:
         """ Play the melee attack animation.
@@ -189,11 +246,13 @@ class Banjo(arcade.Sprite):
         -----
         >>> player.melee()
         """
-        self.not_idle = True
-        if self.current_texture > 6:
-            self.current_texture = 0
-        self.texture = self.melee_textures[self.current_texture][self.character_face_direction]
-        self.current_texture += 1
+        current_texture = self.texture_dict[self.current_animation]
+
+        if self.current_texture_index > len(current_texture) - 1:
+            self.current_texture_index = 0
+
+        self.texture = current_texture[self.current_texture_index][self.character_face_direction]
+        self.current_texture_index += 1
 
     def death(self) -> None:
         """ Play the death animation.
@@ -202,37 +261,28 @@ class Banjo(arcade.Sprite):
         -----
         >>> player.death()
         """
-        self.hp = 0
-        self.not_idle = True
-        if self.current_texture > 9:
-            return
-        self.texture = self.death_textures[self.current_texture][self.character_face_direction]
-        self.current_texture += 1
+        current_texture = self.texture_dict[self.current_animation]
 
-    def pymunk_moved(
+        self.hp = 0
+
+        if self.current_texture_index > len(current_texture) - 1:
+            return
+
+        self.texture = current_texture[self.current_texture_index][self.character_face_direction]
+        self.current_texture_index += 1
+
+    def update_animation(
             self,
-            physics_engine: arcade.PymunkPhysicsEngine,
-            dx: float,
-            dy: float,
-            d_angle: float
+            delta_time: float=1/60,
+            *args,
+            **kwargs
         ) -> None:
 
         if self.hp == 0:
             return
 
-        if abs(dx) <= DEAD_ZONE and not self.not_idle:
-            self.idle()
-            return
+        self.time_since_last_frame += delta_time
 
-        if dx < -DEAD_ZONE and self.character_face_direction == RIGHT_FACING:
-            self.turn(LEFT_FACING)
-            return
-        elif dx > DEAD_ZONE and self.character_face_direction == LEFT_FACING:
-            self.turn(RIGHT_FACING)
-            return
-
-        self.x_odometer += dx
-
-        if abs(self.x_odometer) > DISTANCE_TO_CHANGE_TEXTURE:
-            self.x_odometer = 0
-            self.walk()
+        if self.time_since_last_frame >= self.animation_fps[self.current_animation]:
+            getattr(self, self.current_animation)()
+            self.time_since_last_frame = 0

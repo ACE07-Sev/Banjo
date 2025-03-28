@@ -3,13 +3,13 @@ from __future__ import annotations
 __all__ = ["GameWindow"]
 
 import arcade
-from banjo.characters.soldier_1 import WALKING_VELOCITY, RUNNING_VELOCITY
-from banjo import Soldier1
+from banjo.characters.soldier_3 import WALKING_VELOCITY, RUNNING_VELOCITY
+from banjo import Soldier3
 
 # Constants
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
-SCREEN_TITLE = "Soldier1"
+SCREEN_TITLE = "Soldier3"
 
 
 class GameWindow(arcade.Window):
@@ -34,7 +34,7 @@ class GameWindow(arcade.Window):
 
     `player_list` : arcade.SpriteList
         A list of all the sprites in the game.
-    `player` : Soldier1
+    `player` : Soldier3
         The player character in the game.
     `physics_engine` : arcade.PymunkPhysicsEngine
         The physics engine used to handle player movement.
@@ -56,7 +56,9 @@ class GameWindow(arcade.Window):
         self.left_pressed: bool = False
         self.right_pressed: bool = False
         self.k_pressed: bool = False
+        self.r_pressed: bool = False
         self.shift_pressed: bool = False
+        self.ctrl_pressed: bool = False
         self.m_pressed: bool = False
         self.d_pressed: bool = False
         self.h_pressed: bool = False
@@ -66,8 +68,8 @@ class GameWindow(arcade.Window):
     def setup(self) -> None:
         """ Set up the game window.
         """
-        self.player_list = arcade.SpriteList()
-        self.player = Soldier1()
+        self.player_list: arcade.SpriteList = arcade.SpriteList()
+        self.player = Soldier3()
 
         self.player.center_x = SCREEN_WIDTH // 2
         self.player.center_y = SCREEN_HEIGHT // 2
@@ -85,45 +87,57 @@ class GameWindow(arcade.Window):
             delta_time: float
         ) -> None:
 
-        self.player_list.update_animation()
+        self.player_list.update_animation(delta_time)
 
         if self.d_pressed:
-            self.player.death()
+            self.player.current_animation = "death"
             return
 
-        if self.left_pressed and not self.right_pressed:
-            if self.shift_pressed:
-                self.player.running = True
-                self.physics_engine.set_velocity(self.player, (-RUNNING_VELOCITY, 0))
-            else:
-                self.player.running = False
-                self.physics_engine.set_velocity(self.player, (-WALKING_VELOCITY, 0))
-
-        elif self.right_pressed and not self.left_pressed:
-            if self.shift_pressed:
-                self.player.running = True
-                self.physics_engine.set_velocity(self.player, (RUNNING_VELOCITY, 0))
-            else:
-                self.player.running = False
-                self.physics_engine.set_velocity(self.player, (WALKING_VELOCITY, 0))
-
-        # Stop the player if no key is being pressed
-        else:
-            self.physics_engine.set_velocity(self.player, (0, 0))
-            # self.player.current_animation = "idle"
-            self.player.idle()
-
         if self.m_pressed:
-            self.player.melee()
+            self.player.current_animation = "melee"
+            return
 
         if self.k_pressed:
             if self.shift_pressed:
-                self.player.aim_fire()
+                self.player.current_animation = "aim_fire"
             else:
-                self.player.hip_fire()
+                self.player.current_animation = "crouch_fire"
+            return
+
+        if self.r_pressed:
+            self.player.current_animation = "reload"
+            return
 
         if self.h_pressed:
-            self.player.hurt()
+            self.player.current_animation = "hurt"
+            return
+
+        if self.left_pressed and not self.right_pressed:
+            if self.player.character_face_direction == 0:
+                self.player.turn()
+
+            if self.shift_pressed:
+                self.player.current_animation = "run"
+                self.physics_engine.set_velocity(self.player, (-RUNNING_VELOCITY, 0))
+            else:
+                self.player.current_animation = "walk"
+                self.physics_engine.set_velocity(self.player, (-WALKING_VELOCITY, 0))
+
+        elif self.right_pressed and not self.left_pressed:
+            if self.player.character_face_direction == 1:
+                self.player.turn()
+
+            if self.shift_pressed:
+                self.player.current_animation = "run"
+                self.physics_engine.set_velocity(self.player, (RUNNING_VELOCITY, 0))
+            else:
+                self.player.current_animation = "walk"
+                self.physics_engine.set_velocity(self.player, (WALKING_VELOCITY, 0))
+
+        # Stop the player if no movement keys are pressed
+        else:
+            self.physics_engine.set_velocity(self.player, (0, 0))
+            self.player.current_animation = "idle"
 
         self.physics_engine.step()
 
@@ -141,6 +155,8 @@ class GameWindow(arcade.Window):
             self.m_pressed = True
         elif symbol == arcade.key.K:
             self.k_pressed = True
+        elif symbol == arcade.key.R:
+            self.r_pressed = True
         elif symbol == arcade.key.LSHIFT:
             self.shift_pressed = True
         elif symbol == arcade.key.D:
@@ -162,6 +178,8 @@ class GameWindow(arcade.Window):
             self.m_pressed = False
         elif symbol == arcade.key.K:
             self.k_pressed = False
+        elif symbol == arcade.key.R:
+            self.r_pressed = False
         elif symbol == arcade.key.LSHIFT:
             self.shift_pressed = False
         elif symbol == arcade.key.H:
