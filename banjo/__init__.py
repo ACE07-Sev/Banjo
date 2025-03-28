@@ -1,4 +1,9 @@
-__all__ = ["Banjo", "GameWindow"]
+__all__ = [
+    "Banjo",
+    "Soldier1",
+    "Soldier2",
+    "GameWindow"
+]
 
-from banjo.banjo import Banjo
+from banjo.characters import Banjo, Soldier1, Soldier2
 from banjo.game_window import GameWindow

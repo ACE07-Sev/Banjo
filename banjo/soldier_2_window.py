@@ -3,13 +3,13 @@ from __future__ import annotations
 __all__ = ["GameWindow"]
 
 import arcade
-from banjo.characters.banjo_player import WALKING_VELOCITY
-from banjo import Banjo
+from banjo.characters.soldier_2 import WALKING_VELOCITY, RUNNING_VELOCITY
+from banjo import Soldier2
 
 # Constants
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
-SCREEN_TITLE = "Banjo"
+SCREEN_TITLE = "Soldier2"
 
 
 class GameWindow(arcade.Window):
@@ -23,15 +23,18 @@ class GameWindow(arcade.Window):
         A boolean representing whether the left arrow key is pressed.
     `right_pressed` : bool
         A boolean representing whether the right arrow key is pressed.
+    `shift_pressed` : bool
+        A boolean representing whether the shift key is pressed.
     `m_pressed` : bool
         A boolean representing whether the 'M' key is pressed.
-    `b_pressed` : bool
-        A boolean representing whether the 'B' key is pressed.
+    `space_pressed` : bool
+        A boolean representing whether the space key is pressed.
     `d_pressed` : bool
         A boolean representing whether the 'D' key is pressed.
+
     `player_list` : arcade.SpriteList
         A list of all the sprites in the game.
-    `player` : Banjo
+    `player` : Soldier1
         The player character in the game.
     `physics_engine` : arcade.PymunkPhysicsEngine
         The physics engine used to handle player movement.
@@ -52,9 +55,11 @@ class GameWindow(arcade.Window):
 
         self.left_pressed: bool = False
         self.right_pressed: bool = False
+        self.k_pressed: bool = False
+        self.shift_pressed: bool = False
         self.m_pressed: bool = False
-        self.b_pressed: bool = False
         self.d_pressed: bool = False
+        self.h_pressed: bool = False
 
         self.physics_engine = arcade.PymunkPhysicsEngine()
 
@@ -62,7 +67,7 @@ class GameWindow(arcade.Window):
         """ Set up the game window.
         """
         self.player_list = arcade.SpriteList()
-        self.player = Banjo()
+        self.player = Soldier2()
 
         self.player.center_x = SCREEN_WIDTH // 2
         self.player.center_y = SCREEN_HEIGHT // 2
@@ -87,21 +92,37 @@ class GameWindow(arcade.Window):
             return
 
         if self.left_pressed and not self.right_pressed:
-            self.physics_engine.set_velocity(self.player, (-WALKING_VELOCITY, 0))
+            if self.shift_pressed:
+                self.player.running = True
+                self.physics_engine.set_velocity(self.player, (-RUNNING_VELOCITY, 0))
+            else:
+                self.player.running = False
+                self.physics_engine.set_velocity(self.player, (-WALKING_VELOCITY, 0))
 
         elif self.right_pressed and not self.left_pressed:
-            self.physics_engine.set_velocity(self.player, (WALKING_VELOCITY, 0))
+            if self.shift_pressed:
+                self.player.running = True
+                self.physics_engine.set_velocity(self.player, (RUNNING_VELOCITY, 0))
+            else:
+                self.player.running = False
+                self.physics_engine.set_velocity(self.player, (WALKING_VELOCITY, 0))
 
         # Stop the player if no key is being pressed
         else:
             self.physics_engine.set_velocity(self.player, (0, 0))
-            self.player.texture = self.player.walk_textures[0][self.player.character_face_direction]
+            self.player.texture = self.player.idle_textures[0][self.player.character_face_direction]
 
         if self.m_pressed:
             self.player.melee()
 
-        if self.b_pressed:
-            self.player.bark()
+        if self.k_pressed:
+            if self.shift_pressed:
+                self.player.aim_fire()
+            else:
+                self.player.crouch_fire()
+
+        if self.h_pressed:
+            self.player.hurt()
 
         self.physics_engine.step()
 
@@ -117,10 +138,14 @@ class GameWindow(arcade.Window):
             self.right_pressed = True
         elif symbol == arcade.key.M:
             self.m_pressed = True
-        elif symbol == arcade.key.B:
-            self.b_pressed = True
+        elif symbol == arcade.key.K:
+            self.k_pressed = True
+        elif symbol == arcade.key.LSHIFT:
+            self.shift_pressed = True
         elif symbol == arcade.key.D:
             self.d_pressed = True
+        elif symbol == arcade.key.H:
+            self.h_pressed = True
 
     def on_key_release(
             self,
@@ -134,5 +159,9 @@ class GameWindow(arcade.Window):
             self.right_pressed = False
         elif symbol == arcade.key.M:
             self.m_pressed = False
-        elif symbol == arcade.key.B:
-            self.b_pressed = False
+        elif symbol == arcade.key.K:
+            self.k_pressed = False
+        elif symbol == arcade.key.LSHIFT:
+            self.shift_pressed = False
+        elif symbol == arcade.key.H:
+            self.h_pressed = False
