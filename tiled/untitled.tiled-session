@@ -1,0 +1,37 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "",
+    "expandedProjectPaths": [
+    ],
+    "fileStates": {
+        "": {
+            "scaleInDock": 1
+        },
+        "#City": {
+            "scaleInEditor": 1
+        },
+        "#Flowers": {
+            "scaleInEditor": 1
+        },
+        "map.tmx#Power Line": {
+            "scaleInEditor": 1
+        }
+    },
+    "last.imagePath": "C:/Users/A.C.EA/Downloads/Power-Station-Free-Tileset-Pixel-Art/3 Objects/3 Power lines",
+    "map.lastUsedFormat": "tmx",
+    "map.tileHeight": 64,
+    "map.tileWidth": 64,
+    "openFiles": [
+    ],
+    "project": "untitled.tiled-project",
+    "recentFiles": [
+    ],
+    "tileset.embedInMap": true,
+    "tileset.tileSize": {
+        "height": 8,
+        "width": 8
+    }
+}

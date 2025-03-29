@@ -3,13 +3,13 @@ from __future__ import annotations
 __all__ = ["GameWindow"]
 
 import arcade
-from banjo.characters.soldier_2 import WALKING_VELOCITY, RUNNING_VELOCITY
-from banjo import Soldier2
+from banjo.characters.soldier_1 import WALKING_VELOCITY, RUNNING_VELOCITY
+from banjo import Soldier1
 
 # Constants
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
-SCREEN_TITLE = "Soldier2"
+SCREEN_WIDTH = 1280
+SCREEN_HEIGHT = 720
+SCREEN_TITLE = "Soldier1"
 
 
 class GameWindow(arcade.Window):
@@ -29,6 +29,8 @@ class GameWindow(arcade.Window):
         A boolean representing whether the 'R' key is pressed.
     `shift_pressed` : bool
         A boolean representing whether the shift key is pressed.
+    `ctrl_pressed` : bool
+        A boolean representing whether the control key is pressed.
     `m_pressed` : bool
         A boolean representing whether the 'M' key is pressed.
     `d_pressed` : bool
@@ -61,6 +63,7 @@ class GameWindow(arcade.Window):
         self.k_pressed: bool = False
         self.r_pressed: bool = False
         self.shift_pressed: bool = False
+        self.ctrl_pressed: bool = False
         self.m_pressed: bool = False
         self.d_pressed: bool = False
         self.h_pressed: bool = False
@@ -71,7 +74,7 @@ class GameWindow(arcade.Window):
         """ Set up the game window.
         """
         self.player_list: arcade.SpriteList = arcade.SpriteList()
-        self.player = Soldier2()
+        self.player = Soldier1()
 
         self.player.center_x = SCREEN_WIDTH // 2
         self.player.center_y = SCREEN_HEIGHT // 2
@@ -88,7 +91,6 @@ class GameWindow(arcade.Window):
             self,
             delta_time: float
         ) -> None:
-
         self.player_list.update_animation(delta_time)
 
         if self.d_pressed:
@@ -102,8 +104,10 @@ class GameWindow(arcade.Window):
         if self.k_pressed:
             if self.shift_pressed:
                 self.player.current_animation = "aim_fire"
-            else:
+            elif self.ctrl_pressed:
                 self.player.current_animation = "crouch_fire"
+            else:
+                self.player.current_animation = "hip_fire"
             return
 
         if self.r_pressed:
@@ -161,6 +165,8 @@ class GameWindow(arcade.Window):
             self.r_pressed = True
         elif symbol == arcade.key.LSHIFT:
             self.shift_pressed = True
+        elif symbol == arcade.key.LCTRL:
+            self.ctrl_pressed = True
         elif symbol == arcade.key.D:
             self.d_pressed = True
         elif symbol == arcade.key.H:
@@ -184,5 +190,7 @@ class GameWindow(arcade.Window):
             self.r_pressed = False
         elif symbol == arcade.key.LSHIFT:
             self.shift_pressed = False
+        elif symbol == arcade.key.LCTRL:
+            self.ctrl_pressed = False
         elif symbol == arcade.key.H:
             self.h_pressed = False
