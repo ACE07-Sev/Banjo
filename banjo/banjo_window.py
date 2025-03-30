@@ -54,6 +54,7 @@ class GameWindow(arcade.Window):
         self.m_pressed: bool = False
         self.b_pressed: bool = False
         self.d_pressed: bool = False
+        self.e_pressed: bool = False
 
         self.physics_engine = arcade.PymunkPhysicsEngine()
 
@@ -78,7 +79,7 @@ class GameWindow(arcade.Window):
             moment_of_inertia=arcade.PymunkPhysicsEngine.MOMENT_INF,
             collision_type="player",
             gravity=(0, -1000),
-            elasticity=0
+            elasticity=0,
         )
 
         self.physics_engine.add_sprite_list(
@@ -121,6 +122,31 @@ class GameWindow(arcade.Window):
             self.player.current_animation = "bark"
             return
 
+        if self.e_pressed:
+            new_position = None
+
+            if arcade.check_for_collision(
+                self.player, self.scene["Sewer door left - Interactive"][0]
+            ):
+                new_position = self.scene["Sewer ground - Platform"][0].top
+            for ladder in self.scene["Ladder left - Interactive"]:
+                if arcade.check_for_collision(self.player, ladder):
+                    new_position = self.scene["Concrete ground - Platform"][0].top
+            if arcade.check_for_collision(
+                self.player, self.scene["Sewer door right - Interactive"][-1]
+            ):
+                new_position = self.scene["Sewer ground - Platform"][0].top
+            for ladder in self.scene["Ladder right - Interactive"]:
+                if arcade.check_for_collision(self.player, ladder):
+                    new_position = self.scene["Concrete ground - Platform"][0].top
+
+            if new_position is not None:
+                self.physics_engine.set_position(
+                    self.player, (self.player.center_x, new_position + self.player.height / 2)
+                )
+            self.e_pressed = False
+            self.camera.position = self.player.position
+
         if self.left_pressed and not self.right_pressed:
             if self.player.character_face_direction == 0:
                 self.player.turn()
@@ -156,6 +182,8 @@ class GameWindow(arcade.Window):
             self.b_pressed = True
         elif symbol == arcade.key.D:
             self.d_pressed = True
+        elif symbol == arcade.key.E:
+            self.e_pressed = True
 
     def on_key_release(self, symbol, modifiers) -> None:
 
