@@ -28,16 +28,17 @@
         },
         "map.tmx": {
             "expandedGroupLayers": [
-                24
+                24,
+                28
             ],
             "expandedObjectLayers": [
                 18
             ],
-            "scale": 2,
-            "selectedLayer": 12,
+            "scale": 5.5,
+            "selectedLayer": 23,
             "viewCenter": {
-                "x": 820.75,
-                "y": 616.25
+                "x": 1226.2727272727275,
+                "y": 573
             }
         },
         "map.tmx#Buildings": {

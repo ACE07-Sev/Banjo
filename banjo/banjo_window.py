@@ -56,6 +56,8 @@ class GameWindow(arcade.Window):
         self.d_pressed: bool = False
         self.e_pressed: bool = False
 
+        self.garage_broken: bool = False
+
         self.physics_engine = arcade.PymunkPhysicsEngine()
 
     def setup(self) -> None:
@@ -69,6 +71,10 @@ class GameWindow(arcade.Window):
 
         tile_map = arcade.load_tilemap("./tiled/map.tmx", scaling=TILE_SCALE)
         self.scene = arcade.Scene.from_tilemap(tile_map)
+
+        self.scene.move_sprite_list_before(
+            "Power Supply - Broken", "Power Supply - Working"
+        )
 
         self.scene.add_sprite("Banjo", self.player)
 
@@ -116,6 +122,15 @@ class GameWindow(arcade.Window):
 
         if self.m_pressed:
             self.player.current_animation = "melee"
+
+            if not self.garage_broken and arcade.check_for_collision_with_list(
+                self.player, self.scene["Power Supply - Interactive"]
+            ):
+                self.scene.move_sprite_list_after(
+                    "Power Supply - Broken", "Power Supply - Working"
+                )
+                self.scene.remove_sprite_list_by_name("Garage door - Animated")
+                self.garage_broken = True
             return
 
         if self.b_pressed:
@@ -142,10 +157,11 @@ class GameWindow(arcade.Window):
 
             if new_position is not None:
                 self.physics_engine.set_position(
-                    self.player, (self.player.center_x, new_position + self.player.height / 2)
+                    self.player,
+                    (self.player.center_x, new_position + self.player.height / 2),
                 )
-            self.e_pressed = False
             self.camera.position = self.player.position
+            self.e_pressed = False
 
         if self.left_pressed and not self.right_pressed:
             if self.player.character_face_direction == 0:
