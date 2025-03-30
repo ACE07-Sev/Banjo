@@ -6,6 +6,7 @@
     "activeFile": "",
     "expandedProjectPaths": [
     ],
+    "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
         "": {
             "scaleInDock": 1
@@ -16,7 +17,21 @@
         "#Flowers": {
             "scaleInEditor": 1
         },
+        "map.tmx#Buildings": {
+            "scaleInEditor": 1
+        },
         "map.tmx#Power Line": {
+            "scaleInEditor": 1
+        },
+        "map.tmx#Props-01": {
+            "scaleInEditor": 1
+        },
+        "map.tmx#Props-02": {
+            "dynamicWrapping": true,
+            "scaleInEditor": 1
+        },
+        "map.tmx#Tiles": {
+            "dynamicWrapping": false,
             "scaleInEditor": 1
         }
     },
@@ -33,5 +48,6 @@
     "tileset.tileSize": {
         "height": 8,
         "width": 8
-    }
+    },
+    "tileset.type": 1
 }

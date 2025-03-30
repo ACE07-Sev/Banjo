@@ -58,7 +58,7 @@ AIM_FIRE_TEXTURE_GRID = AIM_FIRE_SPRITESHEET.get_texture_grid(TEXTURE_CANVAS, 6,
 RELOAD_TEXTURE_GRID = RELOAD_SPRITESHEET.get_texture_grid(TEXTURE_CANVAS,6, 6)
 GRENADE_TEXTURE_GRID = GRENADE_SPRITESHEET.get_texture_grid(TEXTURE_CANVAS, 4, 4)
 HURT_TEXTURE_GRID = HURT_SPRITESHEET.get_texture_grid(TEXTURE_CANVAS, 3, 3)
-DEATH_TEXTURE_GRID = DEATH_SPRITESHEET.get_texture_grid(TEXTURE_CANVAS, 9, 9)
+DEATH_TEXTURE_GRID = DEATH_SPRITESHEET.get_texture_grid(TEXTURE_CANVAS, 6, 6)
 
 IDLE_TEXTURES = [(texture, texture.flip_left_right()) for texture in IDLE_TEXTURE_GRID]
 WALK_TEXTURES = [(texture, texture.flip_left_right()) for texture in WALK_TEXTURE_GRID]
@@ -116,6 +116,9 @@ class Soldier3(arcade.Sprite):
         The accuracy of the soldier's weapon.
     `range` : int
         The range of the soldier's weapon.
+    `is_dying` : bool
+        Whether the player character is dying or not.
+        The player character starts with False.
     `texture` : arcade.Texture
         The current texture of the soldier.
     `character_face_direction` : int
@@ -160,6 +163,8 @@ class Soldier3(arcade.Sprite):
         self.accuracy = ACCURACY
         self.range = VISION_RANGE
 
+        # Soldier 3 animation variables
+        self.is_dying = False
         self.texture = self.texture_dict["walk"][0][0]
         self.character_face_direction = RIGHT_FACING
         self.current_animation = "idle"
@@ -178,7 +183,7 @@ class Soldier3(arcade.Sprite):
             "reload": 1/3,
             "grenade": 1/4,
             "hurt": 1/4,
-            "death": 1/2
+            "death": 1/8
         }
 
     def idle(self) -> None:
@@ -363,11 +368,14 @@ class Soldier3(arcade.Sprite):
         -----
         >>> soldier_1.death()
         """
+        if not self.is_dying:
+            self.current_texture_index = 0
+            self.is_dying = True
+
         current_texture = self.texture_dict[self.current_animation]
 
-        self.hp = 0
-
         if self.current_texture_index > len(current_texture) - 1:
+            self.hp = 0
             return
 
         self.texture = current_texture[self.current_texture_index][self.character_face_direction]

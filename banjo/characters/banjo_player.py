@@ -109,6 +109,9 @@ class Banjo(arcade.Sprite):
     `walking_velocity` : int
         The walking velocity of the player character.
         The player character starts with a velocity of 200.
+    `is_dying` : bool
+        Whether the player character is dying or not.
+        The player character starts with False.
     `texture` : arcade.Texture
         The texture of the player character. The player
         character starts with the walking texture.
@@ -159,6 +162,8 @@ class Banjo(arcade.Sprite):
         self.max_dryness = 3
         self.walking_velocity = WALKING_VELOCITY
 
+        # Banjo animation variables
+        self.is_dying = False
         self.texture = self.texture_dict["walk"][0][0]
         self.character_face_direction = RIGHT_FACING
         self.current_animation = "idle"
@@ -172,7 +177,7 @@ class Banjo(arcade.Sprite):
             "turn": 1/2,
             "bark": 1/5,
             "melee": 1/6,
-            "death": 1/2
+            "death": 1/8
         }
 
     def idle(self) -> None:
@@ -261,11 +266,14 @@ class Banjo(arcade.Sprite):
         -----
         >>> player.death()
         """
+        if not self.is_dying:
+            self.current_texture_index = 0
+            self.is_dying = True
+
         current_texture = self.texture_dict[self.current_animation]
 
-        self.hp = 0
-
         if self.current_texture_index > len(current_texture) - 1:
+            self.hp = 0
             return
 
         self.texture = current_texture[self.current_texture_index][self.character_face_direction]

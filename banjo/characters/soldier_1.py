@@ -123,6 +123,9 @@ class Soldier1(arcade.Sprite):
         The accuracy of the soldier's weapon.
     `range` : int
         The range of the soldier's weapon.
+    `is_dying` : bool
+        Whether the player character is dying or not.
+        The player character starts with False.
     `texture` : arcade.Texture
         The current texture of the soldier.
     `character_face_direction` : int
@@ -168,6 +171,8 @@ class Soldier1(arcade.Sprite):
         self.current_mag = SCAR_MAG
         self.range = VISION_RANGE
 
+        # Soldier 1 animation variables
+        self.is_dying = False
         self.texture = self.texture_dict["walk"][0][0]
         self.character_face_direction = RIGHT_FACING
         self.current_animation = "idle"
@@ -187,7 +192,7 @@ class Soldier1(arcade.Sprite):
             "reload": 1/3,
             "grenade": 1/4,
             "hurt": 1/4,
-            "death": 1/2
+            "death": 1/9
         }
 
     def idle(self) -> None:
@@ -399,11 +404,14 @@ class Soldier1(arcade.Sprite):
         -----
         >>> soldier_1.death()
         """
+        if not self.is_dying:
+            self.current_texture_index = 0
+            self.is_dying = True
+
         current_texture = self.texture_dict[self.current_animation]
 
-        self.hp = 0
-
         if self.current_texture_index > len(current_texture) - 1:
+            self.hp = 0
             return
 
         self.texture = current_texture[self.current_texture_index][self.character_face_direction]
