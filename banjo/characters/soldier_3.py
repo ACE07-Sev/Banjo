@@ -3,6 +3,7 @@ from __future__ import annotations
 __all__ = ["Soldier3"]
 
 import arcade
+import pyglet.media as media
 
 # Constants
 RIGHT_FACING = 0
@@ -22,8 +23,10 @@ BULLET_MOVE_FORCE = 4500
 BULLET_MASS = 0.1
 BULLET_GRAVITY = 300
 
-SHOOTING_SOUND = arcade.load_sound("sounds/snd_shooting.wav")
-SHELL_SOUND = arcade.load_sound("sounds/snd_bullet_shell.wav")
+# Sounds
+SHOOTING_SOUND = arcade.load_sound("sounds/shooting.wav")
+SHELL_SOUND = arcade.load_sound("sounds/bullet_shell.wav")
+WALKING_SOUND = arcade.load_sound("sounds/soldier_walking.wav")
 
 PATH_CONSTANT = "sprites/soldier_3/"
 IDLE = PATH_CONSTANT + "Idle.png"
@@ -169,6 +172,11 @@ class Soldier3(arcade.Sprite):
         self.character_face_direction = RIGHT_FACING
         self.current_animation = "idle"
         self.current_texture_index = 0
+
+        # Soldier 3 sound variables
+        self.movement_sound_players: list[media.Player] = []
+        self.walking_sound_playing = False
+        self.running_sound_playing = False
 
         # FPS control variables
         self.time_since_last_frame = 0.0
@@ -396,3 +404,49 @@ class Soldier3(arcade.Sprite):
         if self.time_since_last_frame >= self.animation_fps[self.current_animation]:
             getattr(self, self.current_animation)()
             self.time_since_last_frame = 0
+
+        # Initialize the movement players
+        if self.movement_sound_players:
+            self.movement_sound_players.append(WALKING_SOUND.play(volume=0))
+
+        # If a previous movement sound is being played, stop that and only play
+        # the walking sound
+        if self.current_animation == "walk":
+            if self.running_sound_playing:
+                for sound in self.movement_sound_players:
+                    arcade.stop_sound(sound)
+                    self.movement_sound_players.remove(sound)
+                    self.running_sound_playing = False
+
+            if not self.walking_sound_playing:
+                for sound in self.movement_sound_players:
+                    arcade.stop_sound(sound)
+                    self.movement_sound_players.remove(sound)
+
+                self.movement_sound_players.append(WALKING_SOUND.play(volume=1.5, loop=True))
+                self.walking_sound_playing = True
+
+        # If a previous movement sound is being played, stop that and only play
+        # the running sound
+        elif self.current_animation == "run":
+            if  self.walking_sound_playing:
+                for sound in self.movement_sound_players:
+                    arcade.stop_sound(sound)
+                    self.movement_sound_players.remove(sound)
+                    self.walking_sound_playing = False
+
+            if not self.running_sound_playing:
+                for sound in self.movement_sound_players:
+                    arcade.stop_sound(sound)
+                    self.movement_sound_players.remove(sound)
+
+                self.movement_sound_players.append(WALKING_SOUND.play(volume=1.5, loop=True, speed=2))
+                self.running_sound_playing = True
+
+        # If the player is not moving, stop all movement sounds
+        else:
+            for sound in self.movement_sound_players:
+                arcade.stop_sound(sound)
+                self.movement_sound_players.remove(sound)
+            self.walking_sound_playing = False
+            self.running_sound_playing = False

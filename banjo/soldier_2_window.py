@@ -120,10 +120,10 @@ class GameWindow(arcade.Window):
 
             if self.shift_pressed:
                 self.player.current_animation = "run"
-                self.physics_engine.set_velocity(self.player, (-RUNNING_VELOCITY, 0))
+                self.physics_engine.set_horizontal_velocity(self.player, -RUNNING_VELOCITY)
             else:
                 self.player.current_animation = "walk"
-                self.physics_engine.set_velocity(self.player, (-WALKING_VELOCITY, 0))
+                self.physics_engine.set_horizontal_velocity(self.player, -WALKING_VELOCITY)
 
         elif self.right_pressed and not self.left_pressed:
             if self.player.character_face_direction == 1:
@@ -131,14 +131,14 @@ class GameWindow(arcade.Window):
 
             if self.shift_pressed:
                 self.player.current_animation = "run"
-                self.physics_engine.set_velocity(self.player, (RUNNING_VELOCITY, 0))
+                self.physics_engine.set_horizontal_velocity(self.player, RUNNING_VELOCITY)
             else:
                 self.player.current_animation = "walk"
-                self.physics_engine.set_velocity(self.player, (WALKING_VELOCITY, 0))
+                self.physics_engine.set_horizontal_velocity(self.player, WALKING_VELOCITY)
 
         # Stop the player if no movement keys are pressed
         else:
-            self.physics_engine.set_velocity(self.player, (0, 0))
+            self.physics_engine.set_horizontal_velocity(self.player, 0)
             self.player.current_animation = "idle"
 
         self.physics_engine.step()
