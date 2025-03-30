@@ -9,7 +9,11 @@
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
         "": {
-            "scaleInDock": 1
+            "scaleInDock": 0.5
+        },
+        "#Buildings": {
+            "scaleInDock": 1.5,
+            "scaleInEditor": 1
         },
         "#City": {
             "scaleInEditor": 1
@@ -17,13 +21,41 @@
         "#Flowers": {
             "scaleInEditor": 1
         },
+        "#Tiles": {
+            "scaleInDock": 1
+        },
+        "map.tmx": {
+            "expandedGroupLayers": [
+                28
+            ],
+            "expandedObjectLayers": [
+                18
+            ],
+            "scale": 2,
+            "selectedLayer": 19,
+            "viewCenter": {
+                "x": 1151,
+                "y": 579.25
+            }
+        },
         "map.tmx#Buildings": {
+            "scaleInDock": 1.5,
             "scaleInEditor": 1
+        },
+        "map.tmx#Flowers": {
+            "scaleInDock": 0.5
+        },
+        "map.tmx#Moon": {
+            "scaleInDock": 0.5
+        },
+        "map.tmx#Night sky": {
+            "scaleInDock": 0.5
         },
         "map.tmx#Power Line": {
             "scaleInEditor": 1
         },
         "map.tmx#Props-01": {
+            "scaleInDock": 0.5,
             "scaleInEditor": 1
         },
         "map.tmx#Props-02": {
@@ -32,13 +64,17 @@
         },
         "map.tmx#Tiles": {
             "dynamicWrapping": false,
+            "scaleInDock": 0.5,
             "scaleInEditor": 1
         }
     },
-    "last.imagePath": "C:/Users/A.C.EA/Downloads/Power-Station-Free-Tileset-Pixel-Art/3 Objects/3 Power lines",
+    "frame.defaultDuration": 10000,
+    "last.imagePath": "C:/Users/A.C.EA/Downloads",
+    "map.height": 49,
     "map.lastUsedFormat": "tmx",
-    "map.tileHeight": 64,
-    "map.tileWidth": 64,
+    "map.tileHeight": 16,
+    "map.tileWidth": 16,
+    "map.width": 120,
     "openFiles": [
     ],
     "project": "untitled.tiled-project",
@@ -46,8 +82,8 @@
     ],
     "tileset.embedInMap": true,
     "tileset.tileSize": {
-        "height": 8,
-        "width": 8
+        "height": 16,
+        "width": 16
     },
-    "tileset.type": 1
+    "tileset.type": 0
 }
