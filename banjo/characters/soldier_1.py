@@ -25,6 +25,8 @@ BULLET_GRAVITY = 300
 
 SHOOTING_SOUND = arcade.load_sound("sounds/snd_shooting.wav")
 SHELL_SOUND = arcade.load_sound("sounds/snd_bullet_shell.wav")
+WALKING_SOUND = arcade.load_sound("sounds/soldier_walking.wav")
+RUNNING_SOUND = arcade.load_sound("sounds/soldier_running.wav")
 
 PATH_CONSTANT = "sprites/soldier_1/"
 IDLE = PATH_CONSTANT + "Idle.png"
