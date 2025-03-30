@@ -9,11 +9,12 @@ from banjo import Banjo
 # Constants
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
+TILE_SCALE = 1.5
 SCREEN_TITLE = "Banjo"
 
 
 class GameWindow(arcade.Window):
-    """ `banjo.GameWindow` is the class that represents the game window
+    """`banjo.GameWindow` is the class that represents the game window
     where the game is displayed. It is a subclass of `arcade.Window` and
     has additional functionality to handle player input and game logic.
 
@@ -29,8 +30,6 @@ class GameWindow(arcade.Window):
         A boolean representing whether the 'B' key is pressed.
     `d_pressed` : bool
         A boolean representing whether the 'D' key is pressed.
-    `player_list` : arcade.SpriteList
-        A list of all the sprites in the game.
     `player` : Banjo
         The player character in the game.
     `physics_engine` : arcade.PymunkPhysicsEngine
@@ -42,9 +41,9 @@ class GameWindow(arcade.Window):
     >>> window.setup()
     >>> window.run()
     """
+
     def __init__(self) -> None:
-        """ Initialize the game window.
-        """
+        """Initialize the game window."""
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
         self.set_location(400, 200)
 
@@ -59,28 +58,56 @@ class GameWindow(arcade.Window):
         self.physics_engine = arcade.PymunkPhysicsEngine()
 
     def setup(self) -> None:
-        """ Set up the game window.
-        """
-        self.player_list: arcade.SpriteList = arcade.SpriteList()
+        """Set up the game window."""
         self.player = Banjo()
 
         self.player.center_x = SCREEN_WIDTH // 2
         self.player.center_y = SCREEN_HEIGHT // 2
 
-        self.player_list.append(self.player)
+        self.camera = arcade.Camera2D()
 
-        self.physics_engine.add_sprite(self.player)
+        tile_map = arcade.load_tilemap("./tiled/map.tmx", scaling=TILE_SCALE)
+        self.scene = arcade.Scene.from_tilemap(tile_map)
+
+        self.scene.add_sprite("Banjo", self.player)
+
+        self.physics_engine.add_sprite(
+            self.player,
+            friction=self.player.friction,
+            mass=self.player.mass,
+            moment_of_inertia=arcade.PymunkPhysicsEngine.MOMENT_INF,
+            collision_type="player",
+            gravity=(0, -1000),
+            elasticity=0
+        )
+
+        self.physics_engine.add_sprite_list(
+            self.scene["Concrete ground - Platform"],
+            body_type=arcade.PymunkPhysicsEngine.STATIC,
+            collision_type="ground",
+        )
+        self.physics_engine.add_sprite_list(
+            self.scene["Sewer ground - Platform"],
+            body_type=arcade.PymunkPhysicsEngine.STATIC,
+            collision_type="ground",
+        )
+
+        self.physics_engine.add_sprite_list(
+            self.scene["River ground - Platform"],
+            body_type=arcade.PymunkPhysicsEngine.STATIC,
+            collision_type="ground",
+        )
 
     def on_draw(self) -> None:
         self.clear()
-        self.player_list.draw()
 
-    def on_update(
-            self,
-            delta_time: float
-        ) -> None:
+        self.camera.use()
 
-        self.player_list.update_animation(delta_time)
+        self.scene.draw()
+
+    def on_update(self, delta_time: float) -> None:
+
+        self.player.update_animation(delta_time)
 
         if self.d_pressed:
             self.player.current_animation = "death"
@@ -110,16 +137,14 @@ class GameWindow(arcade.Window):
 
         # Stop the player if no key is being pressed
         else:
-            self.physics_engine.set_velocity(self.player, (0, 0))
+            self.physics_engine.set_horizontal_velocity(self.player, 0)
             self.player.current_animation = "idle"
+
+        self.camera.position = self.player.position
 
         self.physics_engine.step()
 
-    def on_key_press(
-            self,
-            symbol,
-            modifiers
-        ) -> None:
+    def on_key_press(self, symbol, modifiers) -> None:
 
         if symbol == arcade.key.LEFT:
             self.left_pressed = True
@@ -132,11 +157,7 @@ class GameWindow(arcade.Window):
         elif symbol == arcade.key.D:
             self.d_pressed = True
 
-    def on_key_release(
-            self,
-            symbol,
-            modifiers
-        ) -> None:
+    def on_key_release(self, symbol, modifiers) -> None:
 
         if symbol == arcade.key.LEFT:
             self.left_pressed = False

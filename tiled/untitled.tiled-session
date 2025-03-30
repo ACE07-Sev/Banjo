@@ -3,13 +3,15 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "",
+    "activeFile": "map.tmx",
     "expandedProjectPaths": [
+        "."
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
         "": {
-            "scaleInDock": 0.5
+            "scaleInDock": 0.5,
+            "scaleInEditor": 1
         },
         "#Buildings": {
             "scaleInDock": 1.5,
@@ -26,16 +28,16 @@
         },
         "map.tmx": {
             "expandedGroupLayers": [
-                28
+                24
             ],
             "expandedObjectLayers": [
                 18
             ],
             "scale": 2,
-            "selectedLayer": 19,
+            "selectedLayer": 10,
             "viewCenter": {
-                "x": 1151,
-                "y": 579.25
+                "x": 312.75,
+                "y": 616.25
             }
         },
         "map.tmx#Buildings": {
@@ -43,7 +45,8 @@
             "scaleInEditor": 1
         },
         "map.tmx#Flowers": {
-            "scaleInDock": 0.5
+            "scaleInDock": 0.5,
+            "scaleInEditor": 1
         },
         "map.tmx#Moon": {
             "scaleInDock": 0.5
@@ -69,16 +72,20 @@
         }
     },
     "frame.defaultDuration": 10000,
-    "last.imagePath": "C:/Users/A.C.EA/Downloads",
+    "last.exportedFilePath": "C:/pyweek_game/Banjo-Pyweek/tiled",
+    "last.imagePath": "C:/pyweek_game/Banjo-Pyweek/tiled/sprites",
     "map.height": 49,
+    "map.lastUsedExportFilter": "All Files (*)",
     "map.lastUsedFormat": "tmx",
     "map.tileHeight": 16,
     "map.tileWidth": 16,
     "map.width": 120,
     "openFiles": [
+        "map.tmx"
     ],
     "project": "untitled.tiled-project",
     "recentFiles": [
+        "map.tmx"
     ],
     "tileset.embedInMap": true,
     "tileset.tileSize": {

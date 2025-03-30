@@ -8,7 +8,7 @@ import arcade
 RIGHT_FACING = 0
 LEFT_FACING = 1
 
-# Banjo Constants
+# Banjo Constant
 HP = 100
 ATTACK = 10
 HUNGER_RATE = 0.1
@@ -140,7 +140,7 @@ class Banjo(arcade.Sprite):
     def __init__(self) -> None:
         """ Initialize the player character.
         """
-        super().__init__(scale=1.5)
+        super().__init__(scale=1)
 
         self.texture_dict = {
             "idle": IDLE_TEXTURES,
@@ -161,6 +161,8 @@ class Banjo(arcade.Sprite):
         self.current_dryness = 0
         self.max_dryness = 3
         self.walking_velocity = WALKING_VELOCITY
+        self.friction = 1.0
+        self.mass = 2.0
 
         # Banjo animation variables
         self.is_dying = False
@@ -224,6 +226,7 @@ class Banjo(arcade.Sprite):
         """
         self.character_face_direction = abs(self.character_face_direction - 1)
         self.texture = self.texture_dict[self.current_animation][0][self.character_face_direction]
+        self.sync_hit_box_to_texture()
 
     def bark(self) -> None:
         """ Play the barking animation.
@@ -294,3 +297,6 @@ class Banjo(arcade.Sprite):
         if self.time_since_last_frame >= self.animation_fps[self.current_animation]:
             getattr(self, self.current_animation)()
             self.time_since_last_frame = 0
+
+    def update():
+        pass
