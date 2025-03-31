@@ -3,8 +3,7 @@ from __future__ import annotations
 __all__ = ["GameWindow"]
 
 import arcade
-from banjo.characters.banjo_player import WALKING_VELOCITY
-from banjo import Banjo
+from banjo.characters import Banjo, Soldier1, Soldier2
 
 # Constants
 SCREEN_WIDTH = 800
@@ -49,6 +48,7 @@ class GameWindow(arcade.Window):
 
         arcade.set_background_color(arcade.color.BLACK)
 
+        # Player controller variables
         self.left_pressed: bool = False
         self.right_pressed: bool = False
         self.m_pressed: bool = False
@@ -56,26 +56,41 @@ class GameWindow(arcade.Window):
         self.d_pressed: bool = False
         self.e_pressed: bool = False
 
+        # Interactive map elements
         self.garage_broken: bool = False
 
         self.physics_engine = arcade.PymunkPhysicsEngine()
 
     def setup(self) -> None:
-        """Set up the game window."""
+        """Set up the game window.
+        """
+        # Initialize the player and NPC
         self.player = Banjo()
+        self.soldiers: arcade.SpriteList = arcade.SpriteList()
+        for _ in range(5):
+            self.soldiers.append(Soldier1())
+        # self.soldiers.append(Soldier2())
 
+        # Set the initial position of the player and soldiers
         self.player.center_x = SCREEN_WIDTH // 2
         self.player.center_y = SCREEN_HEIGHT // 2
 
+        offset = 0
+        for soldier in self.soldiers:
+            soldier.center_x = SCREEN_WIDTH // 2 + offset
+            soldier.center_y = SCREEN_HEIGHT // 2
+            soldier.set_path([10000])
+            offset += 100
+
+        # Set the initial position of the camera
         self.camera = arcade.Camera2D()
 
+        # Load the map and set the scene
         tile_map = arcade.load_tilemap("./tiled/map.tmx", scaling=TILE_SCALE)
         self.scene = arcade.Scene.from_tilemap(tile_map)
 
-        self.scene.move_sprite_list_before(
-            "Power Supply - Broken", "Power Supply - Working"
-        )
-
+        # Add Banjo to the scene and add his sprite
+        # to the physics engine
         self.scene.add_sprite("Banjo", self.player)
 
         self.physics_engine.add_sprite(
@@ -85,9 +100,25 @@ class GameWindow(arcade.Window):
             moment_of_inertia=arcade.PymunkPhysicsEngine.MOMENT_INF,
             collision_type="player",
             gravity=(0, -1000),
-            elasticity=0,
+            elasticity=0
         )
 
+        # Add Soldier NPCs to the scene and add their sprites
+        # to the physics engine
+        for i, soldier in enumerate(self.soldiers):
+            self.scene.add_sprite(f"Soldier {i + 1}", soldier)
+
+            self.physics_engine.add_sprite(
+                soldier,
+                friction=soldier.friction,
+                mass=soldier.mass,
+                moment_of_inertia=arcade.PymunkPhysicsEngine.MOMENT_INF,
+                collision_type="enemy",
+                gravity=(0, -1000),
+                elasticity=0
+            )
+
+        # Add the tilemap to the scene
         self.physics_engine.add_sprite_list(
             self.scene["Concrete ground - Platform"],
             body_type=arcade.PymunkPhysicsEngine.STATIC,
@@ -98,7 +129,6 @@ class GameWindow(arcade.Window):
             body_type=arcade.PymunkPhysicsEngine.STATIC,
             collision_type="ground",
         )
-
         self.physics_engine.add_sprite_list(
             self.scene["River ground - Platform"],
             body_type=arcade.PymunkPhysicsEngine.STATIC,
@@ -107,15 +137,12 @@ class GameWindow(arcade.Window):
 
     def on_draw(self) -> None:
         self.clear()
-
         self.camera.use()
-
         self.scene.draw()
 
-    def on_update(self, delta_time: float) -> None:
-
-        self.player.update_animation(delta_time)
-
+    def handle_player_controls(self) -> None:
+        """ Handle player controls.
+        """
         if self.d_pressed:
             self.player.current_animation = "death"
             return
@@ -160,33 +187,88 @@ class GameWindow(arcade.Window):
                     self.player,
                     (self.player.center_x, new_position + self.player.height / 2),
                 )
-            self.camera.position = self.player.position
             self.e_pressed = False
+            self.camera.position = self.player.position # type: ignore
 
         if self.left_pressed and not self.right_pressed:
             if self.player.character_face_direction == 0:
                 self.player.turn()
 
             self.player.current_animation = "walk"
-            self.physics_engine.set_horizontal_velocity(self.player, -WALKING_VELOCITY)
+            self.physics_engine.set_horizontal_velocity(self.player, -self.player.walking_velocity)
 
         elif self.right_pressed and not self.left_pressed:
             if self.player.character_face_direction == 1:
                 self.player.turn()
 
             self.player.current_animation = "walk"
-            self.physics_engine.set_horizontal_velocity(self.player, WALKING_VELOCITY)
+            self.physics_engine.set_horizontal_velocity(self.player, self.player.walking_velocity)
 
         # Stop the player if no key is being pressed
         else:
             self.physics_engine.set_horizontal_velocity(self.player, 0)
             self.player.current_animation = "idle"
 
-        self.camera.position = self.player.position
+    def patrol_soldier(
+            self,
+            soldier: Soldier1 | Soldier2,
+        ) -> None:
+
+        if not soldier.position_list:
+            soldier.current_animation = "idle"
+            self.physics_engine.set_horizontal_velocity(
+                soldier,
+                0
+            )
+            return
+
+        target_x = soldier.position_list[0]
+
+        if target_x < soldier.center_x:
+            soldier.character_face_direction = 1
+            soldier.current_animation = "walk"
+            self.physics_engine.set_horizontal_velocity(
+                soldier,
+                -soldier.walking_velocity
+            )
+        elif target_x > soldier.center_x:
+            soldier.character_face_direction = 0
+            soldier.current_animation = "walk"
+            self.physics_engine.set_horizontal_velocity(
+                soldier,
+                soldier.walking_velocity
+            )
+
+        if abs(soldier.center_x - target_x) < 5:
+            soldier.position_list.pop(0)
+            soldier.current_animation = "idle"
+            self.physics_engine.set_horizontal_velocity(
+                soldier,
+                0
+            )
+
+    def on_update(
+            self,
+            delta_time: float
+        ) -> None:
+
+        self.player.update_animation(delta_time)
+        self.soldiers.update_animation(delta_time)
+
+        self.handle_player_controls()
+
+        for soldier in self.soldiers:
+            self.patrol_soldier(soldier)
+
+        self.camera.position = self.player.position # type: ignore
 
         self.physics_engine.step()
 
-    def on_key_press(self, symbol, modifiers) -> None:
+    def on_key_press(
+            self,
+            symbol: int,
+            modifiers: int
+        ) -> None:
 
         if symbol == arcade.key.LEFT:
             self.left_pressed = True
@@ -201,7 +283,11 @@ class GameWindow(arcade.Window):
         elif symbol == arcade.key.E:
             self.e_pressed = True
 
-    def on_key_release(self, symbol, modifiers) -> None:
+    def on_key_release(
+            self,
+            symbol: int,
+            modifiers: int
+        ) -> None:
 
         if symbol == arcade.key.LEFT:
             self.left_pressed = False
