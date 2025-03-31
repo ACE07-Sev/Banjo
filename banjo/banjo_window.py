@@ -4,6 +4,7 @@ __all__ = ["GameWindow"]
 
 import arcade
 from banjo.characters import Banjo, Soldier1, Soldier2
+import random
 
 # Constants
 SCREEN_WIDTH = 800
@@ -40,7 +41,6 @@ class GameWindow(arcade.Window):
     >>> window.setup()
     >>> window.run()
     """
-
     def __init__(self) -> None:
         """Initialize the game window."""
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
@@ -67,19 +67,18 @@ class GameWindow(arcade.Window):
         # Initialize the player and NPC
         self.player = Banjo()
         self.soldiers: arcade.SpriteList = arcade.SpriteList()
-        for _ in range(5):
+        for _ in range(1):
             self.soldiers.append(Soldier1())
-        # self.soldiers.append(Soldier2())
 
         # Set the initial position of the player and soldiers
         self.player.center_x = SCREEN_WIDTH // 2
         self.player.center_y = SCREEN_HEIGHT // 2
 
-        offset = 0
+        offset = 400
         for soldier in self.soldiers:
             soldier.center_x = SCREEN_WIDTH // 2 + offset
             soldier.center_y = SCREEN_HEIGHT // 2
-            soldier.set_path([10000])
+            soldier.set_path([2000])
             offset += 100
 
         # Set the initial position of the camera
@@ -143,6 +142,9 @@ class GameWindow(arcade.Window):
     def handle_player_controls(self) -> None:
         """ Handle player controls.
         """
+        if self.player.is_dead:
+            return
+
         if self.d_pressed:
             self.player.current_animation = "death"
             return
@@ -212,7 +214,17 @@ class GameWindow(arcade.Window):
     def patrol_soldier(
             self,
             soldier: Soldier1 | Soldier2,
+            delta_time: float
         ) -> None:
+        """ Handle the patrol behavior of the soldiers.
+
+        Parameters
+        ----------
+        `soldier` : Soldier1 | Soldier2
+            The soldier to patrol.
+        `delta_time` : float
+            The time since the last update.
+        """
 
         if not soldier.position_list:
             soldier.current_animation = "idle"
@@ -247,6 +259,90 @@ class GameWindow(arcade.Window):
                 0
             )
 
+        # Every 20 seconds, add a new position to the list
+        if not hasattr(soldier, "time_since_last_coordinate"):
+            setattr(soldier, "time_since_last_coordinate", 0.0)
+
+        if soldier.time_since_last_coordinate > 20:
+            soldier.time_since_last_coordinate = 0.0
+            soldier.position_list.append(random.randint(0, SCREEN_WIDTH))
+
+        soldier.time_since_last_coordinate += delta_time
+
+    def can_see_banjo(
+            self,
+            soldier: Soldier1 | Soldier2
+        ) -> bool:
+        """ Check if the soldier can see Banjo.
+
+        Parameters
+        ----------
+        `soldier` : Soldier1 | Soldier2
+            The soldier to check.
+        """
+        if soldier.character_face_direction == 0:
+            return self.player.center_x > soldier.center_x
+        else:
+            return self.player.center_x < soldier.center_x
+
+    def chase_banjo(
+            self,
+            soldier: Soldier1 | Soldier2
+        ) -> None:
+        """ Handle the chasing of Banjo by the soldiers.
+
+        Parameters
+        ----------
+        `soldier` : Soldier1 | Soldier2
+            The soldier to check.
+        """
+        if self.player.position[0] > soldier.position[0]:
+            banjo_anticipated_position = self.player.position[0] + 200
+        else:
+            banjo_anticipated_position = self.player.position[0] - 200
+
+        soldier.position_list = [int(banjo_anticipated_position)] + soldier.position_list
+
+    def shoot_banjo(
+            self,
+            soldier: Soldier1 | Soldier2
+        ) -> None:
+        """ Handle the shooting of Banjo by the soldiers.
+
+        Parameters
+        ----------
+        `soldier` : Soldier1 | Soldier2
+            The soldier to check.
+        """
+        # Stop the soldier from going to shooting mode if Banjo is dead
+        if self.player.is_dead:
+            return
+
+        if abs(self.player.center_y - soldier.center_y) > 100:
+            return
+
+        can_see_banjo = self.can_see_banjo(soldier)
+
+        if abs(self.player.center_x - soldier.center_x) < 300:
+            # If Banjo is behind the soldier, check if he can hear
+            # Banjo when close enough
+            if not can_see_banjo:
+                if abs(self.player.center_x - soldier.center_x) > 100:
+                    return
+
+            soldier.current_animation = "aim_fire"
+
+            self.chase_banjo(soldier)
+
+            soldier.character_face_direction = 1 if self.player.center_x < soldier.center_x else 0
+            self.physics_engine.set_horizontal_velocity(soldier, 0)
+
+            # Check if the soldier hit Banjo
+            if soldier.current_texture_index == 2:
+                hit_chance = random.random()
+                if hit_chance > 0.8:
+                    self.player.damaged(soldier.attack)
+
     def on_update(
             self,
             delta_time: float
@@ -258,7 +354,8 @@ class GameWindow(arcade.Window):
         self.handle_player_controls()
 
         for soldier in self.soldiers:
-            self.patrol_soldier(soldier)
+            self.patrol_soldier(soldier, delta_time)
+            self.shoot_banjo(soldier)
 
         self.camera.position = self.player.position # type: ignore
 

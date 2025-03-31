@@ -170,6 +170,7 @@ class Banjo(arcade.Sprite):
         self.walking_velocity = WALKING_VELOCITY
         self.friction = 1.5
         self.mass = 2.0
+        self.is_dead = False
 
         # Banjo animation variables
         self.is_dying = False
@@ -235,7 +236,6 @@ class Banjo(arcade.Sprite):
         """
         ...
 
-    # UNUSED FEATURE
     def damaged(
             self,
             damage: int
@@ -251,6 +251,10 @@ class Banjo(arcade.Sprite):
         -----
         >>> player.damaged(10)
         """
+        # If Banjo is dead or dying, don't deal further damage
+        if self.current_animation == "death" or self.is_dead:
+            return
+
         self.hp -= damage
 
         if self.hp <= 0:
@@ -351,7 +355,7 @@ class Banjo(arcade.Sprite):
         current_texture = self.texture_dict[self.current_animation]
 
         if self.current_texture_index > len(current_texture) - 1:
-            self.hp = 0
+            self.is_dead = True
             return
 
         self.texture = current_texture[self.current_texture_index][self.character_face_direction]
@@ -364,11 +368,15 @@ class Banjo(arcade.Sprite):
             **kwargs
         ) -> None:
 
-        if self.hp == 0:
+        if self.is_dead:
             return
 
         self.time_since_last_frame += delta_time
 
         if self.time_since_last_frame >= self.animation_fps[self.current_animation]:
+            # Clamp the current animation to death if death is triggered
+            if self.is_dying:
+                self.current_animation = "death"
+
             getattr(self, self.current_animation)()
             self.time_since_last_frame = 0

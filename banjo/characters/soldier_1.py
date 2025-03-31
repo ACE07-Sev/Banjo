@@ -389,11 +389,14 @@ class Soldier1(arcade.Sprite):
         self.texture = current_texture[self.current_texture_index][self.character_face_direction]
 
         if self.current_texture_index == 2:
-            arcade.play_sound(SHOOTING_SOUND)
+            arcade.play_sound(SHOOTING_SOUND, volume=1)
+            pass
         if self.current_texture_index == 4:
             arcade.play_sound(SHELL_SOUND)
+            pass
         if self.current_texture_index == 5:
             arcade.play_sound(SHELL_SOUND, volume=0.8)
+            pass
 
         self.current_texture_index += 1
 
