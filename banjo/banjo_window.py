@@ -225,13 +225,23 @@ class GameWindow(arcade.Window):
         `delta_time` : float
             The time since the last update.
         """
+        # Every 5 seconds of idle after running out of places to patrol
+        # add a new position to the list
+        if not hasattr(soldier, "time_since_last_coordinate"):
+            setattr(soldier, "time_since_last_coordinate", 0.0)
 
         if not soldier.position_list:
+            if soldier.time_since_last_coordinate > 5:
+                soldier.time_since_last_coordinate = 0.0
+                soldier.position_list.append(random.randint(0, SCREEN_WIDTH))
+            soldier.time_since_last_coordinate += delta_time
+
             soldier.current_animation = "idle"
             self.physics_engine.set_horizontal_velocity(
                 soldier,
                 0
             )
+
             return
 
         target_x = soldier.position_list[0]
@@ -258,16 +268,6 @@ class GameWindow(arcade.Window):
                 soldier,
                 0
             )
-
-        # Every 20 seconds, add a new position to the list
-        if not hasattr(soldier, "time_since_last_coordinate"):
-            setattr(soldier, "time_since_last_coordinate", 0.0)
-
-        if soldier.time_since_last_coordinate > 20:
-            soldier.time_since_last_coordinate = 0.0
-            soldier.position_list.append(random.randint(0, SCREEN_WIDTH))
-
-        soldier.time_since_last_coordinate += delta_time
 
     def can_see_banjo(
             self,
