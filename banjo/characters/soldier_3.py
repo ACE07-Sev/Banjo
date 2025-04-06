@@ -27,6 +27,7 @@ BULLET_GRAVITY = 300
 SHOOTING_SOUND = arcade.load_sound("sounds/shooting.wav")
 SHELL_SOUND = arcade.load_sound("sounds/bullet_shell.wav")
 WALKING_SOUND = arcade.load_sound("sounds/soldier_walking.wav")
+RUNNING_SOUND = arcade.load_sound("sounds/soldier_running.wav")
 
 PATH_CONSTANT = "sprites/soldier_3/"
 IDLE = PATH_CONSTANT + "Idle.png"
@@ -119,6 +120,17 @@ class Soldier3(arcade.Sprite):
         The accuracy of the soldier's weapon.
     `range` : int
         The range of the soldier's weapon.
+    `walking_velocity` : int
+        The walking speed of the soldier.
+    `running_velocity` : int
+        The running speed of the soldier.
+    `friction` : float
+        The friction of the soldier's movement.
+    `mass` : float
+        The mass of the soldier.
+    `position_list` : list[int]
+        A list of x coordinates representing the path for the soldier
+        to follow.
     `is_dying` : bool
         Whether the player character is dying or not.
         The player character starts with False.
@@ -130,6 +142,12 @@ class Soldier3(arcade.Sprite):
         The current animation state of the soldier.
     `current_texture_index` : int
         The index of the current texture in the animation state.
+    `movement_sound_players` : list[media.Player]
+        A list of media players for the movement sounds.
+    `walking_sound_playing` : bool
+        A boolean representing whether the walking sound is playing or not.
+    `running_sound_playing` : bool
+        A boolean representing whether the running sound is playing or not.
     `time_since_last_frame` : float
         The time since the last frame was updated.
     `animation_fps` : dict
@@ -143,7 +161,7 @@ class Soldier3(arcade.Sprite):
     def __init__(self) -> None:
         """ Initialize the Soldier 3 NPC.
         """
-        super().__init__(scale=1.5)
+        super().__init__(scale=1)
 
         self.texture_dict = {
             "idle": IDLE_TEXTURES,
@@ -158,6 +176,7 @@ class Soldier3(arcade.Sprite):
             "death": DEATH_TEXTURES
         }
 
+        # Soldier 3 gameplay stats
         self.is_run = False
         self.hp = HEALTH_POINTS
         self.attack = DRAGONOV_DAMAGE
@@ -165,6 +184,13 @@ class Soldier3(arcade.Sprite):
         self.current_mag = DRAGANOV_MAG
         self.accuracy = ACCURACY
         self.range = VISION_RANGE
+        self.walking_velocity = WALKING_VELOCITY
+        self.running_velocity = RUNNING_VELOCITY
+        self.friction = 2.0
+        self.mass = 1.0
+
+        # Soldier 1 paths
+        self.position_list: list[int] = []
 
         # Soldier 3 animation variables
         self.is_dying = False
@@ -193,6 +219,45 @@ class Soldier3(arcade.Sprite):
             "hurt": 1/4,
             "death": 1/8
         }
+
+    def set_path(
+            self,
+            path: list[int]
+        ) -> None:
+        """ Set the path for the soldier to follow.
+
+        Parameters
+        ----------
+        `position_list` : list[int]
+            A list of x coordinates representing the path for the soldier
+            to follow.
+
+        Usage
+        -----
+        >>> soldier_2.set_path([(100, 100), (200, 200), (300, 300)])
+        """
+        self.position_list = path
+
+    def damaged(
+            self,
+            damage: int
+        ) -> None:
+        """ Take damage from an attack.
+
+        Parameters
+        ----------
+        `damage` : int
+            The amount of damage to take.
+
+        Usage
+        -----
+        >>> player.damaged(10)
+        """
+        self.hp -= damage
+
+        if self.hp <= 0:
+            self.hp = 0
+            self.current_animation = "death"
 
     def idle(self) -> None:
         """ Play the idle animation.
@@ -339,6 +404,7 @@ class Soldier3(arcade.Sprite):
         self.texture = current_texture[self.current_texture_index][self.character_face_direction]
         self.current_texture_index += 1
 
+    # UNUSED FEATURE
     def grenade(self) -> None:
         """ Play the grenade throwing animation.
 
@@ -389,22 +455,13 @@ class Soldier3(arcade.Sprite):
         self.texture = current_texture[self.current_texture_index][self.character_face_direction]
         self.current_texture_index += 1
 
-    def update_animation(
-            self,
-            delta_time: float=1/60,
-            *args,
-            **kwargs
-        ) -> None:
+    def play_movement_sound(self) -> None:
+        """ Play the movement sound.
 
-        if self.hp == 0:
-            return
-
-        self.time_since_last_frame += delta_time
-
-        if self.time_since_last_frame >= self.animation_fps[self.current_animation]:
-            getattr(self, self.current_animation)()
-            self.time_since_last_frame = 0
-
+        Usage
+        -----
+        >>> soldier_1.play_movement_sound()"
+        """
         # Initialize the movement players
         if self.movement_sound_players:
             self.movement_sound_players.append(WALKING_SOUND.play(volume=0))
@@ -440,7 +497,7 @@ class Soldier3(arcade.Sprite):
                     arcade.stop_sound(sound)
                     self.movement_sound_players.remove(sound)
 
-                self.movement_sound_players.append(WALKING_SOUND.play(volume=1.5, loop=True, speed=2))
+                self.movement_sound_players.append(RUNNING_SOUND.play(volume=1.5, loop=True))
                 self.running_sound_playing = True
 
         # If the player is not moving, stop all movement sounds
@@ -450,3 +507,19 @@ class Soldier3(arcade.Sprite):
                 self.movement_sound_players.remove(sound)
             self.walking_sound_playing = False
             self.running_sound_playing = False
+
+    def update_animation(
+            self,
+            delta_time: float=1/60,
+            *args,
+            **kwargs
+        ) -> None:
+
+        if self.hp == 0:
+            return
+
+        self.time_since_last_frame += delta_time
+
+        if self.time_since_last_frame >= self.animation_fps[self.current_animation]:
+            getattr(self, self.current_animation)()
+            self.time_since_last_frame = 0

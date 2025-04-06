@@ -15,6 +15,7 @@ HUNGER_RATE = 0.1
 DRYING_RATE = 0.1
 WALKING_VELOCITY = 200
 
+# Sounds
 BANJO_BARK_SOUND = "sounds/banjo_bark.wav"
 
 PATH_CONSTANT = "sprites/banjo/"
@@ -109,6 +110,10 @@ class Banjo(arcade.Sprite):
     `walking_velocity` : int
         The walking velocity of the player character.
         The player character starts with a velocity of 200.
+    `friction` : float
+        The friction of the player character.
+    `mass` : float
+        The mass of the player character.
     `is_dying` : bool
         Whether the player character is dying or not.
         The player character starts with False.
@@ -157,12 +162,15 @@ class Banjo(arcade.Sprite):
         self.hunger_rate = HUNGER_RATE
         self.current_hunger = 0
         self.max_hunger = 3
+        self.time_since_last_eaten = 0.0
         self.drying_rate = DRYING_RATE
         self.current_dryness = 0
         self.max_dryness = 3
+        self.time_since_last_hydrated = 0.0
         self.walking_velocity = WALKING_VELOCITY
-        self.friction = 1.0
+        self.friction = 1.5
         self.mass = 2.0
+        self.is_dead = False
 
         # Banjo animation variables
         self.is_dying = False
@@ -181,6 +189,77 @@ class Banjo(arcade.Sprite):
             "melee": 1/6,
             "death": 1/8
         }
+
+    def eat(self) -> None:
+        """ Eat food to restore hunger.
+
+        Usage
+        -----
+        >>> player.eat()
+        """
+        self.current_hunger = 0
+        self.time_since_last_eaten = 0.0
+
+        if self.hp + 20 >= 100:
+            self.hp = 100
+        else:
+            self.hp += 20
+
+    # UNUSED FEATURE
+    def hunger(self) -> None:
+        """ Hunger to restore fullness.
+
+        Usage
+        -----
+        >>> player.hunger()
+        """
+        ...
+
+    # UNUSED FEATURE
+    def hydrate(self) -> None:
+        """ Hydrate to restore dryness.
+
+        Usage
+        -----
+        >>> player.hydrate()
+        """
+        self.current_dryness = 0
+        self.time_since_last_hydrated = 0.0
+
+    # UNUSED FEATURE
+    def dehydrate(self) -> None:
+        """ Dehydrate to restore dryness.
+
+        Usage
+        -----
+        >>> player.dehydrate()
+        """
+        ...
+
+    def damaged(
+            self,
+            damage: int
+        ) -> None:
+        """ Take damage from an attack.
+
+        Parameters
+        ----------
+        `damage` : int
+            The amount of damage to take.
+
+        Usage
+        -----
+        >>> player.damaged(10)
+        """
+        # If Banjo is dead or dying, don't deal further damage
+        if self.current_animation == "death" or self.is_dead:
+            return
+
+        self.hp -= damage
+
+        if self.hp <= 0:
+            self.hp = 0
+            self.current_animation = "death"
 
     def idle(self) -> None:
         """ Play the idle animation.
@@ -276,7 +355,7 @@ class Banjo(arcade.Sprite):
         current_texture = self.texture_dict[self.current_animation]
 
         if self.current_texture_index > len(current_texture) - 1:
-            self.hp = 0
+            self.is_dead = True
             return
 
         self.texture = current_texture[self.current_texture_index][self.character_face_direction]
@@ -289,14 +368,15 @@ class Banjo(arcade.Sprite):
             **kwargs
         ) -> None:
 
-        if self.hp == 0:
+        if self.is_dead:
             return
 
         self.time_since_last_frame += delta_time
 
         if self.time_since_last_frame >= self.animation_fps[self.current_animation]:
+            # Clamp the current animation to death if death is triggered
+            if self.is_dying:
+                self.current_animation = "death"
+
             getattr(self, self.current_animation)()
             self.time_since_last_frame = 0
-
-    def update():
-        pass

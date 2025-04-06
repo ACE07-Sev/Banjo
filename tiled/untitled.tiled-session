@@ -10,8 +10,7 @@
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
         "": {
-            "scaleInDock": 0.5,
-            "scaleInEditor": 1
+            "scaleInDock": 0.5
         },
         "#Buildings": {
             "scaleInDock": 1.5,
@@ -28,17 +27,18 @@
         },
         "map.tmx": {
             "expandedGroupLayers": [
+                26,
                 24,
                 28
             ],
             "expandedObjectLayers": [
                 18
             ],
-            "scale": 5.5,
-            "selectedLayer": 23,
+            "scale": 1,
+            "selectedLayer": 8,
             "viewCenter": {
-                "x": 1226.2727272727275,
-                "y": 573
+                "x": 863,
+                "y": 297.5
             }
         },
         "map.tmx#Buildings": {
@@ -46,20 +46,19 @@
             "scaleInEditor": 1
         },
         "map.tmx#Flowers": {
-            "scaleInDock": 0.5,
-            "scaleInEditor": 1
+            "scaleInDock": 0.5
         },
         "map.tmx#Moon": {
             "scaleInDock": 0.5
         },
         "map.tmx#Night sky": {
-            "scaleInDock": 0.5
+            "scaleInDock": 0.33
         },
         "map.tmx#Power Line": {
             "scaleInEditor": 1
         },
         "map.tmx#Props-01": {
-            "scaleInDock": 0.5,
+            "scaleInDock": 1.5,
             "scaleInEditor": 1
         },
         "map.tmx#Props-02": {
@@ -68,12 +67,12 @@
         },
         "map.tmx#Tiles": {
             "dynamicWrapping": false,
-            "scaleInDock": 0.5,
+            "scaleInDock": 1.5,
             "scaleInEditor": 1
         }
     },
     "frame.defaultDuration": 10000,
-    "last.exportedFilePath": "C:/pyweek_game/Banjo-Pyweek/tiled",
+    "last.exportedFilePath": "C:/Users/A.C.EA/Documents/GitHub/Banjo-Pyweek/tiled",
     "last.imagePath": "C:/pyweek_game/Banjo-Pyweek/tiled/sprites",
     "map.height": 49,
     "map.lastUsedExportFilter": "All Files (*)",
