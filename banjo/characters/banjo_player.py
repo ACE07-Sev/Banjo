@@ -10,7 +10,7 @@ LEFT_FACING = 1
 
 # Banjo Constant
 HP = 100
-ATTACK = 10
+ATTACK = 1
 HUNGER_RATE = 0.1
 DRYING_RATE = 0.1
 WALKING_VELOCITY = 200
@@ -178,6 +178,7 @@ class Banjo(arcade.Sprite):
         self.character_face_direction = RIGHT_FACING
         self.current_animation = "idle"
         self.current_texture_index = 0
+        self.melee_impact_texture_indices = [3, 6]
 
         # FPS control variables
         self.time_since_last_frame = 0.0
@@ -186,7 +187,7 @@ class Banjo(arcade.Sprite):
             "walk": 1/8,
             "turn": 1/2,
             "bark": 1/5,
-            "melee": 1/6,
+            "melee": 1/8,
             "death": 1/8
         }
 

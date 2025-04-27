@@ -3,14 +3,18 @@ from __future__ import annotations
 __all__ = ["GameWindow"]
 
 import arcade
-from banjo.characters import Banjo, Soldier1, Soldier2
+from banjo.characters import Banjo, Soldier1, Soldier2, Soldier3
+import math
 import random
 
 # Constants
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
+# 720p is the resolution of the game
+SCREEN_WIDTH = 1280
+SCREEN_HEIGHT = 720
 TILE_SCALE = 1.5
 SCREEN_TITLE = "Banjo"
+SOLDIER = Soldier1
+GRAVITY_ACCELERATION = -981
 
 
 class GameWindow(arcade.Window):
@@ -98,14 +102,14 @@ class GameWindow(arcade.Window):
             mass=self.player.mass,
             moment_of_inertia=arcade.PymunkPhysicsEngine.MOMENT_INF,
             collision_type="player",
-            gravity=(0, -1000),
+            gravity=(0, GRAVITY_ACCELERATION * self.player.mass),
             elasticity=0
         )
 
         # Add Soldier NPCs to the scene and add their sprites
         # to the physics engine
         for i, soldier in enumerate(self.soldiers):
-            self.scene.add_sprite(f"Soldier {i + 1}", soldier)
+            self.scene.add_sprite(f"BRAVO-[1-{i}]", soldier)
 
             self.physics_engine.add_sprite(
                 soldier,
@@ -113,7 +117,7 @@ class GameWindow(arcade.Window):
                 mass=soldier.mass,
                 moment_of_inertia=arcade.PymunkPhysicsEngine.MOMENT_INF,
                 collision_type="enemy",
-                gravity=(0, -1000),
+                gravity=(0, GRAVITY_ACCELERATION * soldier.mass),
                 elasticity=0
             )
 
@@ -142,9 +146,12 @@ class GameWindow(arcade.Window):
     def handle_player_controls(self) -> None:
         """ Handle player controls.
         """
-        if self.player.is_dead:
+        # Cannot move the player if it is dead
+        if self.player.is_dying:
             return
 
+        # Maybe you want to die on command, I won't judge
+        # It is not a bug, it is a feature >:)
         if self.d_pressed:
             self.player.current_animation = "death"
             return
@@ -211,27 +218,51 @@ class GameWindow(arcade.Window):
             self.physics_engine.set_horizontal_velocity(self.player, 0)
             self.player.current_animation = "idle"
 
+    def soldier_face_banjo(
+            self,
+            soldier: SOLDIER
+        ) -> None:
+        """ Make the soldier face Banjo.
+
+        Parameters
+        ----------
+        `soldier` : SOLDIER
+            The soldier to check.
+        """
+        soldier.character_face_direction = 1 if self.player.center_x < soldier.center_x else 0
+
     def patrol_soldier(
             self,
-            soldier: Soldier1 | Soldier2,
+            soldier: SOLDIER,
             delta_time: float
         ) -> None:
         """ Handle the patrol behavior of the soldiers.
 
         Parameters
         ----------
-        `soldier` : Soldier1 | Soldier2
+        `soldier` : SOLDIER
             The soldier to patrol.
         `delta_time` : float
             The time since the last update.
         """
-        # Every 5 seconds of idle after running out of places to patrol
-        # add a new position to the list
-        if not hasattr(soldier, "time_since_last_coordinate"):
-            setattr(soldier, "time_since_last_coordinate", 0.0)
+        if soldier.current_animation == "alert":
+            return
 
+        # Overwrite the hurt animation if the soldier is hurt
+        # and give it a delay before it can attack again via
+        # distance to Banjo
+        if soldier.current_animation in ["hurt"]:
+            if soldier.time_since_last_hit > soldier.time_to_recover:
+                soldier.current_animation = "idle"
+                soldier.time_since_last_hit = 0.0
+            soldier.time_since_last_hit += delta_time
+            return
+
+        # Every N seconds of idle after running out of places to patrol
+        # add a new position to the list
+        # N here is `soldier.patrol_pace` and can vary from soldier to soldier
         if not soldier.position_list:
-            if soldier.time_since_last_coordinate > 5:
+            if soldier.time_since_last_coordinate > soldier.patrol_pace:
                 soldier.time_since_last_coordinate = 0.0
                 soldier.position_list.append(random.randint(0, SCREEN_WIDTH))
             soldier.time_since_last_coordinate += delta_time
@@ -253,6 +284,7 @@ class GameWindow(arcade.Window):
                 soldier,
                 -soldier.walking_velocity
             )
+
         elif target_x > soldier.center_x:
             soldier.character_face_direction = 0
             soldier.current_animation = "walk"
@@ -261,6 +293,9 @@ class GameWindow(arcade.Window):
                 soldier.walking_velocity
             )
 
+        # Stop the soldier if it is close enough to the target
+        # This is to avoid the soldier getting stuck in a local
+        # minimum from overshooting and looping forever
         if abs(soldier.center_x - target_x) < 5:
             soldier.position_list.pop(0)
             soldier.current_animation = "idle"
@@ -271,82 +306,214 @@ class GameWindow(arcade.Window):
 
     def can_see_banjo(
             self,
-            soldier: Soldier1 | Soldier2
-        ) -> bool:
-        """ Check if the soldier can see Banjo.
+            soldier: SOLDIER
+        ) -> tuple[bool, bool]:
+        """ Check if the soldier can see Banjo. The code determines whether
+        Banjo is within the soldier's melee and shooting range. The melee
+        range is 100 pixels and the shooting range is defined by the soldier's
+        range attribute.
 
         Parameters
         ----------
-        `soldier` : Soldier1 | Soldier2
+        `soldier` : SOLDIER
             The soldier to check.
+
+        Returns
+        -------
+        `can_melee` : bool
+            A boolean representing whether the soldier can melee Banjo.
+        `can_shoot` : bool
+            A boolean representing whether the soldier can shoot Banjo.
         """
+        can_melee = False
+        can_shoot = False
+
+        if abs(self.player.center_y - soldier.center_y) > 50:
+            return can_melee, can_shoot
+
         if soldier.character_face_direction == 0:
-            return self.player.center_x > soldier.center_x
+            if (
+                self.player.center_x > soldier.center_x
+                and abs(self.player.center_x - soldier.center_x) < soldier.range
+            ):
+                can_shoot = True
+
         else:
-            return self.player.center_x < soldier.center_x
+            if (
+                self.player.center_x < soldier.center_x
+                and abs(self.player.center_x - soldier.center_x) < soldier.range
+            ):
+                can_shoot = True
+
+        if abs(self.player.center_x - soldier.center_x) < 100:
+            can_melee = True
+
+        return can_melee, can_shoot
+
+    def can_hear_banjo(
+            self,
+            soldier: SOLDIER
+        ) -> bool:
+        """ Check if the soldier can hear Banjo. The code determines whether
+        Banjo is within the soldier's hearing range. The hearing range is
+        defined by the soldier's hearing_range attribute.
+
+        Parameters
+        ----------
+        `soldier` : SOLDIER
+            The soldier to check.
+
+        Returns
+        -------
+        `can_hear` : bool
+            A boolean representing whether the soldier can hear Banjo.
+        """
+        if abs(math.sqrt(
+            (self.player.center_x - soldier.center_x) ** 2 +
+            (self.player.center_y - soldier.center_y) ** 2
+        )) < soldier.hearing_range:
+            return True
+
+        return False
 
     def chase_banjo(
             self,
-            soldier: Soldier1 | Soldier2
+            soldier: SOLDIER
         ) -> None:
         """ Handle the chasing of Banjo by the soldiers.
 
         Parameters
         ----------
-        `soldier` : Soldier1 | Soldier2
+        `soldier` : SOLDIER
             The soldier to check.
         """
         if self.player.position[0] > soldier.position[0]:
-            banjo_anticipated_position = self.player.position[0] + 200
+            banjo_anticipated_position = self.player.position[0] + soldier.range
         else:
-            banjo_anticipated_position = self.player.position[0] - 200
+            banjo_anticipated_position = self.player.position[0] - soldier.range
 
         soldier.position_list = [int(banjo_anticipated_position)] + soldier.position_list
 
     def shoot_banjo(
             self,
-            soldier: Soldier1 | Soldier2
+            soldier: SOLDIER
         ) -> None:
         """ Handle the shooting of Banjo by the soldiers.
 
         Parameters
         ----------
-        `soldier` : Soldier1 | Soldier2
+        `soldier` : SOLDIER
             The soldier to check.
         """
-        # Stop the soldier from going to shooting mode if Banjo is dead
-        if self.player.is_dead:
+        if not self.can_see_banjo(soldier)[1]:
             return
 
-        if abs(self.player.center_y - soldier.center_y) > 100:
+        # Ensure the soldier does not shoot when he should be
+        # melee attacking or being hurt
+        if soldier.current_animation in ["melee", "hurt"]:
             return
 
-        can_see_banjo = self.can_see_banjo(soldier)
+        soldier.current_animation = "aim_fire"
 
-        if abs(self.player.center_x - soldier.center_x) < 300:
-            # If Banjo is behind the soldier, check if he can hear
-            # Banjo when close enough
-            if not can_see_banjo:
-                if abs(self.player.center_x - soldier.center_x) > 100:
-                    return
+        # Any contact with the player will trigger the chase process
+        self.chase_banjo(soldier)
 
-            soldier.current_animation = "aim_fire"
+        self.soldier_face_banjo(soldier)
+        self.physics_engine.set_horizontal_velocity(soldier, 0)
 
+        # Check if the soldier hit Banjo
+        if soldier.current_texture_index in soldier.shoot_impact_texture_indices:
+            hit_chance = random.random()
+            if hit_chance > soldier.accuracy:
+                # self.player.damaged(soldier.attack)
+                pass
+
+    def melee_banjo(
+            self,
+            soldier: SOLDIER
+        ) -> None:
+        """ Handle the melee attack of the soldiers.
+
+        Parameters
+        ----------
+        `soldier` : SOLDIER
+            The soldier to check.
+        """
+        if not self.can_see_banjo(soldier)[0]:
+            return
+
+        # Ensure the soldier does not melee when he is hurt
+        # to avoid the soldier being OP and spamming melee attacks
+        # while being hurt
+        if soldier.current_animation in ["alert", "hurt"]:
+            return
+
+        soldier.current_animation = "melee"
+
+        # Any contact with the player will trigger the chase process
+        self.chase_banjo(soldier)
+
+        self.soldier_face_banjo(soldier)
+        self.physics_engine.set_horizontal_velocity(soldier, 0)
+
+        if soldier.current_texture_index in soldier.melee_impact_texture_indices:
+            # self.player.damaged(soldier.attack)
+            pass
+
+    def melee_soldier(
+            self,
+            soldier: SOLDIER
+        ) -> None:
+        """ Handle the melee attack of Banjo on the soldiers.
+
+        Parameters
+        ----------
+        `soldier` : SOLDIER
+            The soldier to check.
+        """
+        if abs(self.player.center_x - soldier.center_x) < 100:
+            if self.player.current_animation == "melee":
+                # Explicitly set the soldier to hurt animation
+                # to add a delay before the soldier can attack again
+                # If soldier is hurt only in `soldier.damaged` then it
+                # will never run the hurt animation due to it being overwritten
+                # by the melee animation
+                soldier.current_animation = "hurt"
+                if self.player.current_texture_index in self.player.melee_impact_texture_indices:
+                    # soldier.damaged(self.player.attack)
+                    pass
+
+    def banjo_bark(
+            self,
+            soldier: SOLDIER
+        ) -> None:
+        """ Handle the barking of Banjo.
+
+        Parameters
+        ----------
+        `soldier` : SOLDIER
+            The soldier to check.
+
+        Returns
+        -------
+        `bark` : bool
+            A boolean representing whether Banjo is barking.
+        """
+        if not self.player.current_animation == "bark":
+            return
+
+        if self.can_hear_banjo(soldier):
+            soldier.current_animation = "alert"
             self.chase_banjo(soldier)
-
-            soldier.character_face_direction = 1 if self.player.center_x < soldier.center_x else 0
-            self.physics_engine.set_horizontal_velocity(soldier, 0)
-
-            # Check if the soldier hit Banjo
-            if soldier.current_texture_index == 2:
-                hit_chance = random.random()
-                if hit_chance > 0.8:
-                    self.player.damaged(soldier.attack)
 
     def on_update(
             self,
             delta_time: float
         ) -> None:
+
+        if self.player.is_dead:
+            for soldier in self.soldiers:
+                soldier.at_ease = True
 
         self.player.update_animation(delta_time)
         self.soldiers.update_animation(delta_time)
@@ -355,7 +522,10 @@ class GameWindow(arcade.Window):
 
         for soldier in self.soldiers:
             self.patrol_soldier(soldier, delta_time)
+            self.banjo_bark(soldier)
+            self.melee_banjo(soldier)
             self.shoot_banjo(soldier)
+            self.melee_soldier(soldier)
 
         self.camera.position = self.player.position # type: ignore
 

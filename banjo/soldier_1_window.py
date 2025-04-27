@@ -62,6 +62,7 @@ class GameWindow(arcade.Window):
         self.right_pressed: bool = False
         self.k_pressed: bool = False
         self.r_pressed: bool = False
+        self.i_pressed: bool = False
         self.shift_pressed: bool = False
         self.ctrl_pressed: bool = False
         self.m_pressed: bool = False
@@ -99,6 +100,10 @@ class GameWindow(arcade.Window):
 
         if self.m_pressed:
             self.player.current_animation = "melee"
+            return
+
+        if self.i_pressed:
+            self.player.current_animation = "alert"
             return
 
         if self.k_pressed:
@@ -159,6 +164,8 @@ class GameWindow(arcade.Window):
             self.right_pressed = True
         elif symbol == arcade.key.M:
             self.m_pressed = True
+        elif symbol == arcade.key.I:
+            self.i_pressed = True
         elif symbol == arcade.key.K:
             self.k_pressed = True
         elif symbol == arcade.key.R:
@@ -182,6 +189,8 @@ class GameWindow(arcade.Window):
             self.left_pressed = False
         elif symbol == arcade.key.RIGHT:
             self.right_pressed = False
+        elif symbol == arcade.key.I:
+            self.i_pressed = False
         elif symbol == arcade.key.M:
             self.m_pressed = False
         elif symbol == arcade.key.K:

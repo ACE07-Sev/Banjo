@@ -3,7 +3,6 @@ from __future__ import annotations
 __all__ = ["Soldier3"]
 
 import arcade
-import pyglet.media as media
 
 # Constants
 RIGHT_FACING = 0
@@ -15,10 +14,12 @@ RUNNING_VELOCITY = 200
 HEALTH_POINTS = 20
 ACCURACY = 0.9
 VISION_RANGE = 1500
+HEARING_RANGE = 300
 
 # Dragonov Constants
 DRAGONOV_DAMAGE = 10
-DRAGANOV_MAG = 20
+DRAGONOV_MAG = 20
+DRAGONOV_MELEE_DAMAGE = 1
 BULLET_MOVE_FORCE = 4500
 BULLET_MASS = 0.1
 BULLET_GRAVITY = 300
@@ -26,8 +27,8 @@ BULLET_GRAVITY = 300
 # Sounds
 SHOOTING_SOUND = arcade.load_sound("sounds/shooting.wav")
 SHELL_SOUND = arcade.load_sound("sounds/bullet_shell.wav")
-WALKING_SOUND = arcade.load_sound("sounds/soldier_walking.wav")
-RUNNING_SOUND = arcade.load_sound("sounds/soldier_running.wav")
+LEFT_STEP = arcade.load_sound("sounds/footstep_left.wav")
+RIGHT_STEP = arcade.load_sound("sounds/footstep_right.wav")
 
 PATH_CONSTANT = "sprites/soldier_3/"
 IDLE = PATH_CONSTANT + "Idle.png"
@@ -112,6 +113,8 @@ class Soldier3(arcade.Sprite):
         The health points of the soldier.
     `attack` : int
         The damage dealt by the soldier's weapon.
+    `melee_attack` : int
+        The damage dealt by the soldier's melee attack.
     `magazine` : int
         The maximum number of rounds in the soldier's magazine.
     `current_mag` : int
@@ -120,6 +123,8 @@ class Soldier3(arcade.Sprite):
         The accuracy of the soldier's weapon.
     `range` : int
         The range of the soldier's weapon.
+    `hearing_range` : int
+        The hearing range of the soldier.
     `walking_velocity` : int
         The walking speed of the soldier.
     `running_velocity` : int
@@ -128,6 +133,8 @@ class Soldier3(arcade.Sprite):
         The friction of the soldier's movement.
     `mass` : float
         The mass of the soldier.
+    `is_dead` : bool
+        Whether the soldier is dead or not.
     `position_list` : list[int]
         A list of x coordinates representing the path for the soldier
         to follow.
@@ -142,12 +149,6 @@ class Soldier3(arcade.Sprite):
         The current animation state of the soldier.
     `current_texture_index` : int
         The index of the current texture in the animation state.
-    `movement_sound_players` : list[media.Player]
-        A list of media players for the movement sounds.
-    `walking_sound_playing` : bool
-        A boolean representing whether the walking sound is playing or not.
-    `running_sound_playing` : bool
-        A boolean representing whether the running sound is playing or not.
     `time_since_last_frame` : float
         The time since the last frame was updated.
     `animation_fps` : dict
@@ -180,14 +181,18 @@ class Soldier3(arcade.Sprite):
         self.is_run = False
         self.hp = HEALTH_POINTS
         self.attack = DRAGONOV_DAMAGE
-        self.magazine = DRAGANOV_MAG
-        self.current_mag = DRAGANOV_MAG
+        self.melee_attack = DRAGONOV_MELEE_DAMAGE
+        self.magazine = DRAGONOV_MAG
+        self.current_mag = DRAGONOV_MAG
         self.accuracy = ACCURACY
         self.range = VISION_RANGE
+        self.hearing_range = HEARING_RANGE
         self.walking_velocity = WALKING_VELOCITY
         self.running_velocity = RUNNING_VELOCITY
         self.friction = 2.0
         self.mass = 1.0
+        self.is_dead = False
+        self.patrol_pace = 5
 
         # Soldier 1 paths
         self.position_list: list[int] = []
@@ -198,14 +203,13 @@ class Soldier3(arcade.Sprite):
         self.character_face_direction = RIGHT_FACING
         self.current_animation = "idle"
         self.current_texture_index = 0
-
-        # Soldier 3 sound variables
-        self.movement_sound_players: list[media.Player] = []
-        self.walking_sound_playing = False
-        self.running_sound_playing = False
+        self.melee_impact_texture_indices = [4]
+        self.shoot_impact_texture_indices = [2]
+        self.at_ease = False
 
         # FPS control variables
         self.time_since_last_frame = 0.0
+        self.time_since_last_coordinate = 0.0
         self.animation_fps = {
             "idle": 1/4,
             "walk": 1/8,
@@ -253,7 +257,11 @@ class Soldier3(arcade.Sprite):
         -----
         >>> player.damaged(10)
         """
+        if self.current_animation == "death" or self.is_dead:
+            return
+
         self.hp -= damage
+        self.current_animation = "hurt"
 
         if self.hp <= 0:
             self.hp = 0
@@ -287,6 +295,12 @@ class Soldier3(arcade.Sprite):
             self.current_texture_index = 0
 
         self.texture = current_texture[self.current_texture_index][self.character_face_direction]
+
+        if self.current_texture_index == 0:
+            arcade.play_sound(LEFT_STEP, volume=0.5)
+        if self.current_texture_index == 4:
+            arcade.play_sound(RIGHT_STEP, volume=0.5)
+
         self.current_texture_index += 1
 
     def run(self) -> None:
@@ -302,6 +316,12 @@ class Soldier3(arcade.Sprite):
             self.current_texture_index = 0
 
         self.texture = current_texture[self.current_texture_index][self.character_face_direction]
+
+        if self.current_texture_index == 1:
+            arcade.play_sound(LEFT_STEP, volume=0.5)
+        if self.current_texture_index == 4:
+            arcade.play_sound(RIGHT_STEP, volume=0.5)
+
         self.current_texture_index += 1
 
     def turn(self) -> None:
@@ -449,64 +469,11 @@ class Soldier3(arcade.Sprite):
         current_texture = self.texture_dict[self.current_animation]
 
         if self.current_texture_index > len(current_texture) - 1:
-            self.hp = 0
+            self.is_dead = True
             return
 
         self.texture = current_texture[self.current_texture_index][self.character_face_direction]
         self.current_texture_index += 1
-
-    def play_movement_sound(self) -> None:
-        """ Play the movement sound.
-
-        Usage
-        -----
-        >>> soldier_1.play_movement_sound()"
-        """
-        # Initialize the movement players
-        if self.movement_sound_players:
-            self.movement_sound_players.append(WALKING_SOUND.play(volume=0))
-
-        # If a previous movement sound is being played, stop that and only play
-        # the walking sound
-        if self.current_animation == "walk":
-            if self.running_sound_playing:
-                for sound in self.movement_sound_players:
-                    arcade.stop_sound(sound)
-                    self.movement_sound_players.remove(sound)
-                    self.running_sound_playing = False
-
-            if not self.walking_sound_playing:
-                for sound in self.movement_sound_players:
-                    arcade.stop_sound(sound)
-                    self.movement_sound_players.remove(sound)
-
-                self.movement_sound_players.append(WALKING_SOUND.play(volume=1.5, loop=True))
-                self.walking_sound_playing = True
-
-        # If a previous movement sound is being played, stop that and only play
-        # the running sound
-        elif self.current_animation == "run":
-            if  self.walking_sound_playing:
-                for sound in self.movement_sound_players:
-                    arcade.stop_sound(sound)
-                    self.movement_sound_players.remove(sound)
-                    self.walking_sound_playing = False
-
-            if not self.running_sound_playing:
-                for sound in self.movement_sound_players:
-                    arcade.stop_sound(sound)
-                    self.movement_sound_players.remove(sound)
-
-                self.movement_sound_players.append(RUNNING_SOUND.play(volume=1.5, loop=True))
-                self.running_sound_playing = True
-
-        # If the player is not moving, stop all movement sounds
-        else:
-            for sound in self.movement_sound_players:
-                arcade.stop_sound(sound)
-                self.movement_sound_players.remove(sound)
-            self.walking_sound_playing = False
-            self.running_sound_playing = False
 
     def update_animation(
             self,
@@ -515,11 +482,18 @@ class Soldier3(arcade.Sprite):
             **kwargs
         ) -> None:
 
-        if self.hp == 0:
+        if self.is_dead:
             return
+
+        if self.at_ease:
+            self.current_animation = "idle"
 
         self.time_since_last_frame += delta_time
 
         if self.time_since_last_frame >= self.animation_fps[self.current_animation]:
+            # Clamp the current animation to death if death is triggered
+            if self.is_dying:
+                self.current_animation = "death"
+
             getattr(self, self.current_animation)()
             self.time_since_last_frame = 0
