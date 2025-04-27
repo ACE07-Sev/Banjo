@@ -425,8 +425,7 @@ class GameWindow(arcade.Window):
         if soldier.current_texture_index in soldier.shoot_impact_texture_indices:
             hit_chance = random.random()
             if hit_chance > soldier.accuracy:
-                # self.player.damaged(soldier.attack)
-                pass
+                self.player.damaged(soldier.attack)
 
     def melee_banjo(
             self,
@@ -457,8 +456,7 @@ class GameWindow(arcade.Window):
         self.physics_engine.set_horizontal_velocity(soldier, 0)
 
         if soldier.current_texture_index in soldier.melee_impact_texture_indices:
-            # self.player.damaged(soldier.attack)
-            pass
+            self.player.damaged(soldier.attack)
 
     def melee_soldier(
             self,
@@ -480,8 +478,7 @@ class GameWindow(arcade.Window):
                 # by the melee animation
                 soldier.current_animation = "hurt"
                 if self.player.current_texture_index in self.player.melee_impact_texture_indices:
-                    # soldier.damaged(self.player.attack)
-                    pass
+                    soldier.damaged(self.player.attack)
 
     def banjo_bark(
             self,
@@ -500,6 +497,7 @@ class GameWindow(arcade.Window):
             A boolean representing whether Banjo is barking.
         """
         if not self.player.current_animation == "bark":
+            soldier.current_animation = "idle"
             return
 
         if self.can_hear_banjo(soldier):
@@ -521,8 +519,8 @@ class GameWindow(arcade.Window):
         self.handle_player_controls()
 
         for soldier in self.soldiers:
-            self.patrol_soldier(soldier, delta_time)
             self.banjo_bark(soldier)
+            self.patrol_soldier(soldier, delta_time)
             self.melee_banjo(soldier)
             self.shoot_banjo(soldier)
             self.melee_soldier(soldier)

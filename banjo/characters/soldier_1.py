@@ -512,13 +512,13 @@ class Soldier1(arcade.Sprite):
         """
         if not self.is_alert:
             self.current_texture_index = 0
-            
+
         current_texture = self.texture_dict[self.current_animation]
         self.is_alert = True
 
         if self.current_texture_index > len(current_texture) - 1:
             self.is_alert = False
-            self.current_texture_index = 0
+            return
 
         self.texture = current_texture[self.current_texture_index][self.character_face_direction]
         self.current_texture_index += 1
