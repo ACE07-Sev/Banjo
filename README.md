@@ -9,7 +9,7 @@ Banjo is a 2D platformer game with pixel artstyle, following the story of Banjo,
 
 ## Quickstart
 
-Simply run the `main.py` to run the code. As of 28/4/2025 the code is still incomplete and only provides access to trying the core mechanics. Feel free to add your cool features, NPCs, or whatever. Banjo likes variety.
+Simply run the `main.py` to run the code. As of 28/4/2025 the code is still incomplete and only provides access to trying the core mechanics. Feel free to add your cool features, NPCs, or whatever. Banjo likes variety. Try the `ace` branch for now.
 
 ## License
 
