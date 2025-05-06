@@ -27,9 +27,9 @@
         },
         "map.tmx": {
             "expandedGroupLayers": [
-                26,
+                28,
                 24,
-                28
+                26
             ],
             "expandedObjectLayers": [
                 18
@@ -37,7 +37,7 @@
             "scale": 1,
             "selectedLayer": 8,
             "viewCenter": {
-                "x": 863,
+                "x": 1397,
                 "y": 297.5
             }
         },
