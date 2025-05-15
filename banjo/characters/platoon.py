@@ -3,7 +3,11 @@ from __future__ import annotations
 __all__ = ["Platoon"]
 
 import arcade
-from banjo.characters import Soldier1
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from banjo.characters import SOLDIER_TYPE
+
 import random
 
 
@@ -13,12 +17,12 @@ class Platoon(arcade.SpriteList):
 
     Parameters
     ----------
-    `soldiers` : list[banjo.characters.Soldier1]
+    `soldiers` : list[banjo.characters.SOLDIER_TYPE]
         The list of soldiers that are part of the platoon.
 
     Attributes
     ----------
-    `soldiers` : list[banjo.characters.Soldier1]
+    `soldiers` : list[banjo.characters.SOLDIER_TYPE]
         The list of soldiers that are part of the platoon.
 
     Usage
@@ -27,7 +31,7 @@ class Platoon(arcade.SpriteList):
     """
     def __init__(
             self,
-            soldiers: list[Soldier1]
+            soldiers: list[SOLDIER_TYPE]
         ) -> None:
         """ Initializes the platoon with a list of soldiers.
         """

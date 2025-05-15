@@ -1,24 +1,26 @@
 from __future__ import annotations
 
-__all__ = ["Soldier1"]
+__all__ = ["Soldier2"]
 
 import arcade
 from banjo.characters import Soldier
-from banjo.resources.textures import SOLDIER1_TEXTURES
+from banjo.resources.textures import SOLDIER2_TEXTURES
 
-# Soldier 1 Constants
-WALKING_VELOCITY = 1.8
-RUNNING_VELOCITY = 2.5
+# Soldier 2 Constants
+WALKING_VELOCITY = 100
+RUNNING_VELOCITY = 200
 HEALTH_POINTS = 30
-ACCURACY = 0.5
-GRENADE_DAMAGE = 80
-VISION_RANGE = 500
-HEARING_RANGE = 1000
+ACCURACY = 0.7
+VISION_RANGE = 800
+HEARING_RANGE = 300
 
-# SCAR Constants
-SCAR_DAMAGE = 5
-SCAR_MAG = 20
-SCAR_MELEE_DAMAGE = 4
+# FAMAS Constants
+FAMAS_DAMAGE = 10
+FAMAS_MAG = 20
+FAMAS_MELEE_DAMAGE = 1
+BULLET_MOVE_FORCE = 4500
+BULLET_MASS = 0.1
+BULLET_GRAVITY = 300
 
 # Sounds
 SHOOTING_SOUND = arcade.load_sound("sounds/shooting.wav")
@@ -30,42 +32,42 @@ ANIMATION_FPS = {
     "idle": 1/6,
     "walk": 1/8,
     "run": 1/12,
+    "turn": 1/2,
     "melee": 1/6,
     "shoot": 1/16,
-    "reload": 1/7,
-    "alert": 1/8,
+    "reload": 1/3,
     "hurt": 1/4,
-    "dead": 1/9,
-    "at_ease": 1/6,
+    "death": 1/9
 }
 
 
-class Soldier1(Soldier):
-    """ `banjo.Soldier1` is the class that represents the Soldier 1 NPC
+class Soldier2(Soldier):
+    """ `banjo.Soldier2` is the class that represents the Soldier 2 NPC
     character in the game. It is a subclass of `arcade.Sprite` and has
     additional functionality to handle walking, running, melee attacks,
     shooting, grenade throwing, taking damage, and dying.
 
-    Soldier 1 is the aggressive close combat type of NPC. They are
-    equipped with a powerful assault rifle and a grenade. They are
-    always on the move and will attack Banjo on sight. They are
-    not very accurate but they make up for it with their numbers and
-    aggressiveness.
+    Soldier 2 is the tactical mid-range soldier NPC in the game. They
+    are equipped with a 5.56mm FAMAS F1 with a 25 round magazine. They
+    are trained to take cover and shoot from a distance. They will keep
+    their distance from Banjo and shoot at him from a distance. Due to
+    crouching and aiming down sights, they are more accurate than the
+    other NPCs.
 
     Notes
     -----
-    Sgt. McTavish is a competitive FNG. He's a bit of a loose cannon
-    which is why he runs towards the enemy instead of away from them.
-    He's a bit of a show off and likes to show off his skills by
-    throwing grenades and shooting from the hip.
+    Lt. Riley is a seasoned soldier who has been in the field for a
+    while. He's a calm and collected soldier who knows how to handle
+    himself in a firefight. He's a bit of a perfectionist and likes to
+    take his time to line up his shots.
 
-    Sgt. McTavish has 30 health points and deals 5 damage with each
-    round he hits Banjo with. He rocks a 7.62mm FN SCAR-H 17 with a
-    20 round magazine. He also carries an M67 fragmentation grenade
-    which he can throw at Banjo.
+    Lt. Riley has 30 health points and deals 10 damage with each round
+    he hits Banjo with. He rocks a 5.56mm FAMAS F1 with a 25 round magazine.
+    He only carries a smoke grenade which he can throw at Banjo to obscure
+    his vision.
 
-    Sgt. McTavish is part of TF141 and is a member of the Bravo Team.
-    Due to how slippery he is sometimes, he's also known as "Soap".
+    Lt. Riley is part of TF141 and is a member of the Bravo Team.
+    Due to how cold and calculated he is, he is also known as "Ghost".
 
     Attributes
     ----------
@@ -125,26 +127,26 @@ class Soldier1(Soldier):
 
     Usage
     -----
-    >>> soldier_1 = Soldier1()
+    >>> soldier_2 = Soldier2()
     """
     def __init__(self) -> None:
-        """ Initialize the Soldier 1 NPC.
+        """ Initialize the Soldier 2 NPC.
         """
         super().__init__(
-            texture_dict=SOLDIER1_TEXTURES,
+            texture_dict=SOLDIER2_TEXTURES,
             animation_fps=ANIMATION_FPS,
             hp=HEALTH_POINTS,
             shooting_range=VISION_RANGE,
             melee_range=100,
             hearing_range=HEARING_RANGE,
             accuracy=ACCURACY,
-            shooting_damage=SCAR_DAMAGE,
-            mag_size=SCAR_MAG,
-            melee_damage=SCAR_MELEE_DAMAGE,
+            shooting_damage=FAMAS_DAMAGE,
+            mag_size=FAMAS_MAG,
+            melee_damage=FAMAS_MELEE_DAMAGE,
             walking_velocity=WALKING_VELOCITY,
             running_velocity=RUNNING_VELOCITY,
-            patrol_pace=5,
-            time_to_recover=5,
+            patrol_pace=3,
+            time_to_recover=4,
             melee_impact_texture_indices=[1],
             shoot_impact_texture_indices=[2]
         )
@@ -154,15 +156,13 @@ class Soldier1(Soldier):
 
         Usage
         -----
-        >>> soldier_1.walk()
+        >>> soldier_2.walk()
         """
         super().walk()
 
-        # Since we increment the current texture index in the walk method,
-        # we need to add 1 to these indices to get the correct sound effect
         if self.current_texture_index == 3:
             arcade.play_sound(LEFT_STEP, volume=0.5 * self.sound_amp)
-        if self.current_texture_index == 6:
+        if self.current_texture_index == 7:
             arcade.play_sound(RIGHT_STEP, volume=0.5 * self.sound_amp)
 
     def run(self) -> None:
@@ -170,15 +170,13 @@ class Soldier1(Soldier):
 
         Usage
         -----
-        >>> soldier_1.run()
+        >>> soldier_2.run()
         """
         super().run()
 
-        # Since we increment the current texture index in the run method,
-        # we need to add 1 to these indices to get the correct sound effect
-        if self.current_texture_index == 3:
+        if self.current_texture_index == 4:
             arcade.play_sound(LEFT_STEP, volume=0.5 * self.sound_amp)
-        if self.current_texture_index == 7:
+        if self.current_texture_index == 8:
             arcade.play_sound(RIGHT_STEP, volume=0.5 * self.sound_amp)
 
     def shoot(self) -> None:
@@ -186,12 +184,10 @@ class Soldier1(Soldier):
 
         Usage
         -----
-        >>> soldier_1.shoot()
+        >>> soldier_2.shoot()
         """
         super().shoot()
 
-        # Since we increment the current texture index in the shoot method,
-        # we need to add 1 to these indices to get the correct sound effect
         if self.current_texture_index == 3:
             arcade.play_sound(SHOOTING_SOUND, volume=self.sound_amp)
             self.fsm.current_mag -= 1

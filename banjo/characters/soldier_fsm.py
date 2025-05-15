@@ -54,10 +54,6 @@ class SoldierFSM(StateMachine):
         The range of the soldier's melee attack.
     `hearing_range` : int
         The range within which the soldier can hear the enemy.
-    `shooting_damage` : int
-        The damage dealt by the soldier's shooting.
-    `melee_damage` : int
-        The damage dealt by the soldier's melee attack.
     `mag_size` : int
         The size of the soldier's magazine.
     `current_mag` : int
@@ -169,8 +165,6 @@ class SoldierFSM(StateMachine):
             shooting_range: int = 800,
             melee_range: int = 100,
             hearing_range: int = 1000,
-            shooting_damage: int = 10,
-            melee_damage: int = 20,
             mag_size: int = 20
         ) -> None:
         """ Initialize a `banjo.characters.SoldierFSM` instance.
@@ -180,8 +174,6 @@ class SoldierFSM(StateMachine):
         self.shooting_range = shooting_range
         self.melee_range = melee_range
         self.hearing_range = hearing_range
-        self.shooting_damage = shooting_damage
-        self.melee_damage = melee_damage
         self.mag_size = mag_size
 
         # General attributes
