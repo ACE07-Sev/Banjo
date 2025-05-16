@@ -120,6 +120,9 @@ class Soldier1(Soldier):
         The texture indices where shooting impact occurs.
     `sound_amp` : float
         The sound volume multiplier to reflect the distance to Banjo.
+    `pan` : float
+        The sound pan to reflect the position which the soldier is in
+        with respect to Banjo. This mimics directional audio.
     `physics_engine` : arcade.PhysicsEnginePlatformer
         The physics engine managing the soldier's movement and collisions.
 
@@ -161,9 +164,9 @@ class Soldier1(Soldier):
         # Since we increment the current texture index in the walk method,
         # we need to add 1 to these indices to get the correct sound effect
         if self.current_texture_index == 3:
-            arcade.play_sound(LEFT_STEP, volume=0.5 * self.sound_amp)
+            arcade.play_sound(LEFT_STEP, volume=0.5 * self.sound_amp, pan=self.pan)
         if self.current_texture_index == 6:
-            arcade.play_sound(RIGHT_STEP, volume=0.5 * self.sound_amp)
+            arcade.play_sound(RIGHT_STEP, volume=0.5 * self.sound_amp, pan=self.pan)
 
     def run(self) -> None:
         """ Play the running animation.
@@ -177,9 +180,9 @@ class Soldier1(Soldier):
         # Since we increment the current texture index in the run method,
         # we need to add 1 to these indices to get the correct sound effect
         if self.current_texture_index == 3:
-            arcade.play_sound(LEFT_STEP, volume=0.5 * self.sound_amp)
+            arcade.play_sound(LEFT_STEP, volume=0.5 * self.sound_amp, pan=self.pan)
         if self.current_texture_index == 7:
-            arcade.play_sound(RIGHT_STEP, volume=0.5 * self.sound_amp)
+            arcade.play_sound(RIGHT_STEP, volume=0.5 * self.sound_amp, pan=self.pan)
 
     def shoot(self) -> None:
         """ Play the aim fire shooting animation.
@@ -193,9 +196,9 @@ class Soldier1(Soldier):
         # Since we increment the current texture index in the shoot method,
         # we need to add 1 to these indices to get the correct sound effect
         if self.current_texture_index == 3:
-            arcade.play_sound(SHOOTING_SOUND, volume=self.sound_amp)
+            arcade.play_sound(SHOOTING_SOUND, volume=self.sound_amp, pan=self.pan)
             self.fsm.current_mag -= 1
         if self.current_texture_index == 5:
-            arcade.play_sound(SHELL_SOUND, volume=self.sound_amp)
+            arcade.play_sound(SHELL_SOUND, volume=self.sound_amp, pan=self.pan)
         if self.current_texture_index == 6:
-            arcade.play_sound(SHELL_SOUND, volume=0.8 * self.sound_amp)
+            arcade.play_sound(SHELL_SOUND, volume=0.8 * self.sound_amp, pan=self.pan)

@@ -121,6 +121,9 @@ class Soldier3(Soldier):
         The texture indices where shooting impact occurs.
     `sound_amp` : float
         The sound volume multiplier to reflect the distance to Banjo.
+    `pan` : float
+        The sound pan to reflect the position which the soldier is in
+        with respect to Banjo. This mimics directional audio.
     `physics_engine` : arcade.PhysicsEnginePlatformer
         The physics engine managing the soldier's movement and collisions.
 
@@ -160,9 +163,9 @@ class Soldier3(Soldier):
         super().walk()
 
         if self.current_texture_index == 1:
-            arcade.play_sound(LEFT_STEP, volume=0.5 * self.sound_amp)
+            arcade.play_sound(LEFT_STEP, volume=0.5 * self.sound_amp, pan=self.pan)
         if self.current_texture_index == 5:
-            arcade.play_sound(RIGHT_STEP, volume=0.5 * self.sound_amp)
+            arcade.play_sound(RIGHT_STEP, volume=0.5 * self.sound_amp, pan=self.pan)
 
     def run(self) -> None:
         """ Play the running animation.
@@ -188,8 +191,8 @@ class Soldier3(Soldier):
         super().shoot()
 
         if self.current_texture_index == 3:
-            arcade.play_sound(SHOOTING_SOUND, volume=self.sound_amp)
+            arcade.play_sound(SHOOTING_SOUND, volume=self.sound_amp, pan=self.pan)
         if self.current_texture_index == 5:
-            arcade.play_sound(SHELL_SOUND, volume=self.sound_amp)
+            arcade.play_sound(SHELL_SOUND, volume=self.sound_amp, pan=self.pan)
         if self.current_texture_index == 6:
-            arcade.play_sound(SHELL_SOUND, volume=0.8 * self.sound_amp)
+            arcade.play_sound(SHELL_SOUND, volume=0.8 * self.sound_amp, pan=self.pan)

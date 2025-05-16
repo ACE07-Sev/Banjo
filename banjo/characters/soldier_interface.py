@@ -111,6 +111,9 @@ class Soldier(arcade.Sprite):
         The texture indices where shooting impact occurs.
     `sound_amp` : float
         The sound volume multiplier to reflect the distance to Banjo.
+    `pan` : float
+        The sound pan to reflect the position which the soldier is in
+        with respect to Banjo. This mimics directional audio.
     `physics_engine` : arcade.PhysicsEnginePlatformer
         The physics engine managing the soldier's movement and collisions.
 
@@ -180,6 +183,7 @@ class Soldier(arcade.Sprite):
 
         # Sound variable
         self.sound_amp = 1.0
+        self.pan = 0.0
 
         # Physics engine
         self.physics_engine = arcade.PhysicsEnginePlatformer(
@@ -676,6 +680,10 @@ class Soldier(arcade.Sprite):
             raise ValueError("Banjo object must be passed as a keyword argument.")
 
         self.sound_amp = max(0.0, 1 - abs(self.center_x - banjo.center_x) / banjo.hearing_range)
+
+        # Most left is -1, most right is 1
+        self.pan = (self.center_x - banjo.center_x) / banjo.hearing_range
+        self.pan = max(-1.0, min(1.0, self.pan))
 
         self.physics_engine.update()
 
