@@ -441,7 +441,7 @@ class SoldierFSM(StateMachine):
                 self.is_recovered = False
                 return True
 
-        return enemy_hitting
+        return False
 
     def has_recovered(self) -> bool:
         """ Check if the soldier has recovered from being hit.

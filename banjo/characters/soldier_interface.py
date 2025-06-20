@@ -654,8 +654,8 @@ class Soldier(arcade.Sprite):
     def update_animation(
             self,
             delta_time: float=1/60,
-            *args, # type: ignore
-            **kwargs # type: ignore
+            *args,
+            **kwargs
         ) -> None:
 
         if self.is_dead:
@@ -670,8 +670,8 @@ class Soldier(arcade.Sprite):
     def update(
             self,
             delta_time: float=1/60,
-            *args, # type: ignore
-            **kwargs # type: ignore
+            *args,
+            **kwargs
         ) -> None:
 
         banjo = kwargs.get("banjo")

@@ -10,7 +10,7 @@ from banjo.resources.textures import BANJO_TEXTURES
 # Sounds
 BANJO_BARK_SOUND = "sounds/banjo_bark.wav"
 
-# Banjo Constant
+# Banjo constants
 HP = 100
 ATTACK = 1
 HUNGER_RATE = 0.1
@@ -348,8 +348,8 @@ class Banjo(arcade.Sprite):
     def update_animation(
             self,
             delta_time: float=1/60,
-            *args, # type: ignore
-            **kwargs # type: ignore
+            *args,
+            **kwargs
         ) -> None:
 
         if self.is_dead:
@@ -368,8 +368,8 @@ class Banjo(arcade.Sprite):
     def update(
             self,
             delta_time: float=1/60,
-            *args, # type: ignore
-            **kwargs # type: ignore
+            *args,
+            **kwargs
         ) -> None:
         """ Update the player character.
 

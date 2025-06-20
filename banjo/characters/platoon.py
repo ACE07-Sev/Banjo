@@ -79,8 +79,8 @@ class Platoon(arcade.SpriteList):
     def update(
             self,
             delta_time: float=1/60,
-            *args, # type: ignore
-            **kwargs # type: ignore
+            *args,
+            **kwargs
         ) -> None:
 
         banjo = kwargs.get("banjo")

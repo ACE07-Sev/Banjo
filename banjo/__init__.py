@@ -1,3 +1,3 @@
 __all__ = ["GameWindow"]
 
-from banjo.banjo_window import GameWindow
+from banjo.game_window import GameWindow

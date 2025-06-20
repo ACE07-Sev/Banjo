@@ -1,7 +1,7 @@
-from banjo.banjo_window import GameWindow
+import arcade
+from banjo import GameWindow
 
 
 if __name__ == "__main__":
-    window = GameWindow()
-    window.setup()
-    window.run()
+    game_window = GameWindow()
+    arcade.run()

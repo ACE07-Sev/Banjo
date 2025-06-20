@@ -1,24 +1,22 @@
 from __future__ import annotations
 
-__all__ = ["GameWindow"]
+__all__ = ["GameView"]
 
 import arcade
 from banjo.characters import Banjo, Soldier1, Platoon
 from banjo.resources.game_constants import LEFT_FACING, RIGHT_FACING
-from banjo.resources.level_maps import SCENE, PLATFORMS
+from banjo.resources.level_maps import TILE_MAP, load_scene, load_platforms
 import random
 
 # Constants
 # 720p is the resolution of the game
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
-TILE_SCALE = 1.5
-SCREEN_TITLE = "Banjo"
 
 
-class GameWindow(arcade.Window):
-    """`banjo.GameWindow` is the class that represents the game window
-    where the game is displayed. It is a subclass of `arcade.Window` and
+class GameView(arcade.View):
+    """`banjo.views.GameView` is the class that represents the game view
+    where the game is displayed. It is a subclass of `arcade.View` and
     has additional functionality to handle player input and game logic.
 
     Attributes
@@ -33,26 +31,30 @@ class GameWindow(arcade.Window):
         A boolean representing whether the 'B' key is pressed.
     `d_pressed` : bool
         A boolean representing whether the 'D' key is pressed.
-    `player` : Banjo
+    `e_pressed` : bool
+        A boolean representing whether the 'E' key is pressed.
+    `end_level` : bool
+        A boolean representing whether the level has ended.
+    `player_died` : bool
+        A boolean representing whether the player has died.
+    `time_to_game_over` : float
+        Add delay before the game over screen is displayed.
+    `garage_broken` : bool
+        A boolean representing whether the garage door is broken.
+    `player` : banjo.characters.Banjo
         The player character in the game.
-
-    Usage
-    -----
-    >>> window = GameWindow()
-    >>> window.setup()
-    >>> window.run()
+    `soldiers` : banjo.characters.Platoon
+        A platoon of soldier NPCs in the game. This is of type
+        `arcade.SpriteList`.
+    `camera` : arcade.Camera2D
+        The camera used to render the game view.
+    `scene` : arcade.Scene
+        The scene containing all the sprites and interactive elements in the game.
     """
     def __init__(self) -> None:
-        """ Initialize the game window.
+        """ Initialize the game view.
         """
-        super().__init__(
-            SCREEN_WIDTH,
-            SCREEN_HEIGHT,
-            SCREEN_TITLE,
-            antialiasing=False,
-            vsync=True
-        )
-        self.set_location(400, 200)
+        super().__init__()
 
         arcade.set_background_color(arcade.color.BLACK)
 
@@ -64,18 +66,30 @@ class GameWindow(arcade.Window):
         self.d_pressed: bool = False
         self.e_pressed: bool = False
 
+        # Game constants
+        self.end_level: bool = False
+        self.player_died: bool = False
+        self.time_to_game_over: float = 0.0
+
         # Interactive map elements
         self.garage_broken: bool = False
 
     def setup(self) -> None:
-        """Set up the game window.
+        """Set up the game view.
         """
-        for platform in PLATFORMS:
+        # Load the map and set the scene
+        # We need to create the scene and platforms here
+        # to avoid snapshots of sprites when restarting
+        # the view
+        scene = load_scene(TILE_MAP)
+        platforms = load_platforms(scene)
+
+        for platform in platforms:
             platform.initialize()
 
         # Initialize the player and NPC
         self.player = Banjo()
-        self.soldiers: arcade.SpriteList = Platoon([Soldier1() for _ in range(1)])
+        self.soldiers: Platoon = Platoon([Soldier1() for _ in range(1)])
 
         # Set the initial position of the player and soldiers
         self.player.center_x = 2400
@@ -91,8 +105,7 @@ class GameWindow(arcade.Window):
         # Set the initial position of the camera
         self.camera = arcade.Camera2D()
 
-        # Load the map and set the scene
-        self.scene = SCENE
+        self.scene = scene
 
         # Add Banjo to the scene and add his sprite
         # to the physics engine
@@ -113,11 +126,13 @@ class GameWindow(arcade.Window):
         """
         # Cannot move the player if it is dead
         if self.player.is_dying:
+            self.player_died = True
             return
 
         # Maybe you want to die on command, I won't judge
         # It is not a bug, it is a feature >:)
         if self.d_pressed:
+            self.player_died = True
             self.player.current_animation = "dead"
             return
 
@@ -160,7 +175,7 @@ class GameWindow(arcade.Window):
                 self.player.position = self.player.center_x, new_position + self.player.height // 2
 
             self.e_pressed = False
-            self.camera.position = self.player.position # type: ignore
+            self.camera.position = self.player.position
 
         if self.left_pressed and not self.right_pressed:
             if self.player.character_facing_direction == RIGHT_FACING:
@@ -183,12 +198,17 @@ class GameWindow(arcade.Window):
             delta_time: float
         ) -> None:
 
+        if self.player_died:
+            self.time_to_game_over += delta_time
+            if self.time_to_game_over > 5.0:
+                self.game_over_screen()
+
         self.player.update(delta_time)
         self.soldiers.update(delta_time, banjo=self.player)
 
         self.handle_player_controls()
 
-        self.camera.position = self.player.position # type: ignore
+        self.camera.position = self.player.position
 
     def on_key_press(
             self,
@@ -208,9 +228,6 @@ class GameWindow(arcade.Window):
             self.d_pressed = True
         elif symbol == arcade.key.E:
             self.e_pressed = True
-        elif symbol == arcade.key.F:
-            self.set_fullscreen(fullscreen=not self.fullscreen)
-            self.set_vsync(vsync=True)
 
     def on_key_release(
             self,
@@ -233,7 +250,17 @@ class GameWindow(arcade.Window):
             height: int
         ) -> None:
 
-        # Call the parent. Failing to do this will mess up the coordinates,
-        # and default to 0,0 at the center and the edges being -1 to 1.
+        # Call the parent
+        # Failing to do this will mess up the coordinates,
+        # and default to 0,0 at the center and the edges
+        # being -1 to 1
         super().on_resize(width, height)
         self.camera.match_window()
+
+    def game_over_screen(self) -> None:
+        """ Display the end screen.
+        """
+        from banjo.views import GameOverView
+
+        game_over_view = GameOverView()
+        self.window.show_view(game_over_view)

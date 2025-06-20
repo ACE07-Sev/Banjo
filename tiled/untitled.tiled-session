@@ -10,7 +10,7 @@
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
         "": {
-            "scaleInDock": 0.5
+            "scaleInDock": 1
         },
         "#Buildings": {
             "scaleInDock": 1.5,
@@ -27,18 +27,18 @@
         },
         "map.tmx": {
             "expandedGroupLayers": [
-                28,
                 24,
+                28,
                 26
             ],
             "expandedObjectLayers": [
                 18
             ],
             "scale": 1,
-            "selectedLayer": 8,
+            "selectedLayer": 12,
             "viewCenter": {
-                "x": 1397,
-                "y": 297.5
+                "x": 565,
+                "y": 432.5
             }
         },
         "map.tmx#Buildings": {
@@ -69,11 +69,14 @@
             "dynamicWrapping": false,
             "scaleInDock": 1.5,
             "scaleInEditor": 1
+        },
+        "map.tmx#burning_loop_2": {
+            "scaleInEditor": 4
         }
     },
-    "frame.defaultDuration": 10000,
+    "frame.defaultDuration": 100,
     "last.exportedFilePath": "C:/Users/A.C.EA/Documents/GitHub/Banjo-Pyweek/tiled",
-    "last.imagePath": "C:/pyweek_game/Banjo-Pyweek/tiled/sprites",
+    "last.imagePath": "C:/Users/A.C.EA/Downloads/fire_fx_v1.0/fire_fx_v1.0/png/orange/loops",
     "map.height": 49,
     "map.lastUsedExportFilter": "All Files (*)",
     "map.lastUsedFormat": "tmx",
