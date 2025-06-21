@@ -89,7 +89,7 @@ class GameView(arcade.View):
 
         # Initialize the player and NPC
         self.player = Banjo()
-        self.soldiers: Platoon = Platoon([Soldier1() for _ in range(1)])
+        self.soldiers: Platoon = Platoon([Soldier1() for _ in range(3)])
 
         # Set the initial position of the player and soldiers
         self.player.center_x = 2400
@@ -262,5 +262,4 @@ class GameView(arcade.View):
         """
         from banjo.views import GameOverView
 
-        game_over_view = GameOverView()
-        self.window.show_view(game_over_view)
+        self.window.show_view(GameOverView())

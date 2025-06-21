@@ -39,9 +39,7 @@ class GameWindow(arcade.Window):
     def setup_game_view(self) -> None:
         """Set up the game view.
         """
-        start_view = StartView()
-        start_view.setup()
-        self.show_view(start_view)
+        self.show_view(StartView())
 
     def on_key_press(
             self,

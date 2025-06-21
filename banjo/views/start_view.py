@@ -8,22 +8,22 @@ import arcade
 class StartView(arcade.View):
     """ The start view of the game.
     """
-    def __init__(self):
+    def __init__(self) -> None:
+        """ Initialize the start view.
+        """
         super().__init__()
 
-    def on_show(self) -> None:
-        arcade.set_background_color(arcade.color.AMAZON)
-
-    def setup(self) -> None:
-        self.texts = [
-            arcade.Text("CODENAME: Banjo", 100, 200, arcade.color.WHITE, 24),
-            arcade.Text("Press any key to start", 100, 150, arcade.color.WHITE, 18)
-        ]
+        self.title = arcade.Text(
+            "CODENAME: Banjo", 100, 200, arcade.color.WHITE, 24
+        )
+        self.instruction = arcade.Text(
+            "Press any key to start", 100, 150, arcade.color.WHITE, 18
+        )
 
     def on_draw(self) -> None:
         self.clear()
-        for text in self.texts:
-            text.draw()
+        self.title.draw()
+        self.instruction.draw()
 
     def on_key_press(
             self,
@@ -32,7 +32,7 @@ class StartView(arcade.View):
         ) -> None:
 
         if symbol == arcade.key.ENTER or symbol == arcade.key.SPACE:
-            from banjo.views.game_view import GameView
+            from banjo.views import GameView
 
             game_view = GameView()
             game_view.setup()
