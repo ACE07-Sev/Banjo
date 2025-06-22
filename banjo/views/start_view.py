@@ -25,6 +25,9 @@ class StartView(arcade.View):
         self.title.draw()
         self.instruction.draw()
 
+    def on_show_view(self) -> None:
+        arcade.Camera2D().use()
+
     def on_key_press(
             self,
             symbol: int,
