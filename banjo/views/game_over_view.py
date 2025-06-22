@@ -25,6 +25,9 @@ class GameOverView(arcade.View):
         self.text_game_over.draw()
         self.text_instruction.draw()
 
+    def on_show_view(self) -> None:
+        arcade.Camera2D().use()
+
     def on_key_press(
             self,
             symbol: int,
