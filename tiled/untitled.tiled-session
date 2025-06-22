@@ -1,0 +1,99 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "map.tmx",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "file.lastUsedOpenFilter": "All Files (*)",
+    "fileStates": {
+        "": {
+            "scaleInDock": 1
+        },
+        "#Buildings": {
+            "scaleInDock": 1.5,
+            "scaleInEditor": 1
+        },
+        "#City": {
+            "scaleInEditor": 1
+        },
+        "#Flowers": {
+            "scaleInEditor": 1
+        },
+        "#Tiles": {
+            "scaleInDock": 1
+        },
+        "map.tmx": {
+            "expandedGroupLayers": [
+                24,
+                28,
+                26
+            ],
+            "expandedObjectLayers": [
+                18
+            ],
+            "scale": 1,
+            "selectedLayer": 12,
+            "viewCenter": {
+                "x": 565,
+                "y": 432.5
+            }
+        },
+        "map.tmx#Buildings": {
+            "scaleInDock": 1.5,
+            "scaleInEditor": 1
+        },
+        "map.tmx#Flowers": {
+            "scaleInDock": 0.5
+        },
+        "map.tmx#Moon": {
+            "scaleInDock": 0.5
+        },
+        "map.tmx#Night sky": {
+            "scaleInDock": 0.33
+        },
+        "map.tmx#Power Line": {
+            "scaleInEditor": 1
+        },
+        "map.tmx#Props-01": {
+            "scaleInDock": 1.5,
+            "scaleInEditor": 1
+        },
+        "map.tmx#Props-02": {
+            "dynamicWrapping": true,
+            "scaleInEditor": 1
+        },
+        "map.tmx#Tiles": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1.5,
+            "scaleInEditor": 1
+        },
+        "map.tmx#burning_loop_2": {
+            "scaleInEditor": 4
+        }
+    },
+    "frame.defaultDuration": 100,
+    "last.exportedFilePath": "C:/Users/A.C.EA/Documents/GitHub/Banjo-Pyweek/tiled",
+    "last.imagePath": "C:/Users/A.C.EA/Downloads/fire_fx_v1.0/fire_fx_v1.0/png/orange/loops",
+    "map.height": 49,
+    "map.lastUsedExportFilter": "All Files (*)",
+    "map.lastUsedFormat": "tmx",
+    "map.tileHeight": 16,
+    "map.tileWidth": 16,
+    "map.width": 120,
+    "openFiles": [
+        "map.tmx"
+    ],
+    "project": "untitled.tiled-project",
+    "recentFiles": [
+        "map.tmx"
+    ],
+    "tileset.embedInMap": true,
+    "tileset.tileSize": {
+        "height": 16,
+        "width": 16
+    },
+    "tileset.type": 0
+}

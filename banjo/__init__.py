@@ -1,4 +1,3 @@
-__all__ = ["Banjo", "GameWindow"]
+__all__ = ["GameWindow"]
 
-from banjo.banjo import Banjo
 from banjo.game_window import GameWindow
