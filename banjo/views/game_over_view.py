@@ -34,9 +34,8 @@ class GameOverView(arcade.View):
             modifiers: int
         ) -> None:
 
-        if symbol == arcade.key.ENTER or symbol == arcade.key.SPACE:
-            from banjo.views import GameView
+        from banjo.views import GameView
 
-            game_view = GameView()
-            game_view.setup()
-            self.window.show_view(game_view)
+        game_view = GameView()
+        game_view.setup()
+        self.window.show_view(game_view)

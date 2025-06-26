@@ -228,6 +228,11 @@ class GameView(arcade.View):
             self.d_pressed = True
         elif symbol == arcade.key.E:
             self.e_pressed = True
+        elif symbol == arcade.key.ESCAPE:
+            from banjo.views import MidMenuView
+
+            # Pause the game and show the mid menu
+            self.window.show_view(MidMenuView(self))
 
     def on_key_release(
             self,
