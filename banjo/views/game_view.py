@@ -8,11 +8,6 @@ from banjo.resources.game_constants import LEFT_FACING, RIGHT_FACING
 from banjo.resources.level_maps import TILE_MAP, load_scene, load_platforms
 import random
 
-# Constants
-# 720p is the resolution of the game
-SCREEN_WIDTH = 1280
-SCREEN_HEIGHT = 720
-
 
 class GameView(arcade.View):
     """`banjo.views.GameView` is the class that represents the game view
@@ -33,12 +28,12 @@ class GameView(arcade.View):
         A boolean representing whether the 'D' key is pressed.
     `e_pressed` : bool
         A boolean representing whether the 'E' key is pressed.
-    `end_level` : bool
-        A boolean representing whether the level has ended.
     `player_died` : bool
         A boolean representing whether the player has died.
     `time_to_game_over` : float
         Add delay before the game over screen is displayed.
+    `time_to_win` : float
+        Add delay before the win screen is displayed.
     `garage_broken` : bool
         A boolean representing whether the garage door is broken.
     `player` : banjo.characters.Banjo
@@ -67,9 +62,9 @@ class GameView(arcade.View):
         self.e_pressed: bool = False
 
         # Game constants
-        self.end_level: bool = False
         self.player_died: bool = False
         self.time_to_game_over: float = 0.0
+        self.time_to_win: float = 0.0
 
         # Interactive map elements
         self.garage_broken: bool = False
@@ -89,16 +84,16 @@ class GameView(arcade.View):
 
         # Initialize the player and NPC
         self.player = Banjo()
-        self.soldiers: Platoon = Platoon([Soldier1() for _ in range(3)])
+        self.soldiers: Platoon = Platoon([Soldier1() for _ in range(2)])
 
         # Set the initial position of the player and soldiers
         self.player.center_x = 2400
-        self.player.center_y = SCREEN_HEIGHT // 2
+        self.player.center_y = self.window.height // 2
 
         offset = 400
         for soldier in self.soldiers:
-            soldier.center_x = SCREEN_WIDTH // 2 + offset
-            soldier.center_y = SCREEN_HEIGHT // 2
+            soldier.center_x = self.window.width // 2 + offset
+            soldier.center_y = self.window.height // 2
             soldier.fsm.set_patrol_checkpoints([random.randint(500, 2000)])
             offset += 100
 
@@ -115,6 +110,19 @@ class GameView(arcade.View):
         # to the physics engine
         for i, soldier in enumerate(self.soldiers):
             self.scene.add_sprite(f"BRAVO-[1-{i}]", soldier)
+
+    def check_end_level(self) -> bool:
+        """ Check if the level has ended.
+
+        Returns
+        -------
+        bool
+            True if the level has ended, False otherwise.
+        """
+        for soldier in self.soldiers:
+            if not soldier.current_state == "dead":
+                return False
+        return True
 
     def on_draw(self) -> None:
         self.clear()
@@ -203,6 +211,11 @@ class GameView(arcade.View):
             if self.time_to_game_over > 5.0:
                 self.game_over_screen()
 
+        elif self.check_end_level():
+            self.time_to_win += delta_time
+            if self.time_to_win > 5.0:
+                self.win_screen()
+
         self.player.update(delta_time)
         self.soldiers.update(delta_time, banjo=self.player)
 
@@ -268,3 +281,10 @@ class GameView(arcade.View):
         from banjo.views import GameOverView
 
         self.window.show_view(GameOverView())
+
+    def win_screen(self) -> None:
+        """ Display the win screen.
+        """
+        from banjo.views import WinView
+
+        self.window.show_view(WinView())
