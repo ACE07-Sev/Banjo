@@ -1,20 +1,20 @@
 from __future__ import annotations
 
-__all__ = ["GameOverView"]
+__all__ = ["WinView"]
 
 import arcade
 
 
-class GameOverView(arcade.View):
-    """ `banjo.views.GameOverView` is the class that represents the game over view
-    where the game is displayed after the player loses. It is a subclass of
+class WinView(arcade.View):
+    """ `banjo.views.WinView` is the class that represents the win view
+    where the game is displayed after the player wins. It is a subclass of
     `arcade.View` and has additional functionality to handle player input
-    and display the game over message.
+    and display the win message.
 
     Attributes
     ----------
-    `text_game_over` : arcade.Text
-        The text displayed when the player loses.
+    `text_win` : arcade.Text
+        The text displayed when the player wins.
     `text_instruction` : arcade.Text
         The text displayed to instruct the player to try again.
     """
@@ -24,10 +24,10 @@ class GameOverView(arcade.View):
         super().__init__()
 
         self.text_game_over = arcade.Text(
-            "'Target is eliminated. RTB...'", 100, 200, arcade.color.RED, 24
+            "Banjo made it downstream", 100, 200, arcade.color.GREEN, 24
         )
         self.text_instruction = arcade.Text(
-            "Press any key to try again", 100, 150, arcade.color.WHITE, 18
+            "Press any key for main menu", 100, 150, arcade.color.WHITE, 18
         )
 
     def on_draw(self) -> None:
@@ -44,8 +44,6 @@ class GameOverView(arcade.View):
             modifiers: int
         ) -> None:
 
-        from banjo.views import GameView
+        from banjo.views import StartMenuView
 
-        game_view = GameView()
-        game_view.setup()
-        self.window.show_view(game_view)
+        self.window.show_view(StartMenuView())

@@ -24,6 +24,10 @@ class Platoon(arcade.SpriteList):
     ----------
     `soldiers` : list[banjo.characters.SOLDIER_TYPE]
         The list of soldiers that are part of the platoon.
+    `max_soldier_distance` : int, optional, default=800
+        The maximum distance between soldiers in the platoon.
+        This is used to maintain cohesion among the soldiers,
+        and prevent them from straying too far from one another.
 
     Usage
     -----
@@ -31,9 +35,10 @@ class Platoon(arcade.SpriteList):
     """
     def __init__(
             self,
-            soldiers: list[SOLDIER_TYPE]
+            soldiers: list[SOLDIER_TYPE],
+            max_soldier_distance: int=800
         ) -> None:
-        """ Initializes the platoon with a list of soldiers.
+        """ Initialize the platoon with a list of soldiers.
         """
         super().__init__(use_spatial_hash=True)
         self.soldiers = soldiers
@@ -41,11 +46,13 @@ class Platoon(arcade.SpriteList):
         for soldier in soldiers:
             self.append(soldier)
 
+        self.max_soldier_distance = max_soldier_distance
+
     def converge(
             self,
             target_position: int
         ) -> None:
-        """ Sets all platoon members to converge on the target position.
+        """ Set all platoon members to converge on the target position.
 
         Parameters
         ----------
@@ -61,8 +68,17 @@ class Platoon(arcade.SpriteList):
         for soldier in self.soldiers:
             soldier.fsm.chase_to = target_position + random.randint(-300, 300)
 
+    def maintain_cohesion(self) -> None:
+        """ Prevent soldiers from straying too far from one another.
+        """
+        center = sum(s.center_x for s in self.soldiers) / len(self.soldiers)
+
+        for soldier in self.soldiers:
+            if abs(soldier.center_x - center) > self.max_soldier_distance:
+                soldier.fsm.chase_to = int(center + random.randint(-100, 100))
+
     def shots_fired(self) -> None:
-        """ Sets all platoon members to converge on where the
+        """ Set all platoon members to converge on where the
         shot came from.
 
         Usage
@@ -92,3 +108,4 @@ class Platoon(arcade.SpriteList):
             soldier.update(delta_time, banjo=banjo)
 
         self.shots_fired()
+        self.maintain_cohesion()

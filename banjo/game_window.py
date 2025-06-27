@@ -3,7 +3,7 @@ from __future__ import annotations
 __all__ = ["GameWindow"]
 
 import arcade
-from banjo.views import StartView
+from banjo.views import StartMenuView
 
 # Constants
 # 720p is the resolution of the game
@@ -33,13 +33,8 @@ class GameWindow(arcade.Window):
             antialiasing=False,
             vsync=True
         )
-        self.setup_game_view()
-        self.set_mouse_visible(False)
-
-    def setup_game_view(self) -> None:
-        """Set up the game view.
-        """
-        self.show_view(StartView())
+        self.show_view(StartMenuView())
+        self.set_mouse_visible(True)
 
     def on_key_press(
             self,
@@ -47,10 +42,6 @@ class GameWindow(arcade.Window):
             modifiers: int
         ) -> None:
 
-        if symbol == arcade.key.R:
-            self.setup_game_view()
-        elif symbol == arcade.key.ESCAPE:
-            self.close()
-        elif symbol == arcade.key.F:
+        if symbol == arcade.key.F:
             self.set_fullscreen(fullscreen=not self.fullscreen)
             self.set_vsync(vsync=True)

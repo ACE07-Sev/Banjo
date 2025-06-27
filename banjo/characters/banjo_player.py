@@ -16,7 +16,7 @@ ATTACK = 1
 HUNGER_RATE = 0.1
 DRYING_RATE = 0.1
 WALKING_VELOCITY = 5
-HEARING_RANGE = 500
+HEARING_RANGE = 800
 
 
 class Banjo(arcade.Sprite):
@@ -57,6 +57,8 @@ class Banjo(arcade.Sprite):
     `hp` : int
         The health points of the player character. The player
         character starts with 100 health points.
+    `max_hp` : int
+        The maximum health points of the player character.
     `attack` : int
         The attack points of the player character. The player
         character starts with 10 attack points.
@@ -131,6 +133,7 @@ class Banjo(arcade.Sprite):
 
         # Banjo gameplay stats
         self.hp = HP
+        self.max_hp = HP
         self.attack = ATTACK
         self.hunger_rate = HUNGER_RATE
         self.current_hunger = 0
