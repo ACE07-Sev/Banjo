@@ -21,6 +21,8 @@ class CreditsView(arcade.View):
         The vertical position of the text in the credits view.
     `scroll_speed` : float
         The speed at which the credits scroll vertically.
+    `ost_player` : pyglet.media.Player
+        The original soundtrack player during the credits.
     """
     def __init__(self) -> None:
         """ Initialize the credits view.
@@ -30,8 +32,20 @@ class CreditsView(arcade.View):
         credit_lines = [
             "Banjo",
             "",
-            "Developed by:\n Amir Ali Malekani Nezhad \n",
-            "Special Thanks:\n Gökçe Çimen \n",
+            "Developed by:"
+            "",
+            "Amir Ali Malekani Nezhad",
+            "Md. Raisul Hasan Shahrukh",
+            "",
+            "Soundtrack by:",
+            "",
+            "Suno AI",
+            "",
+            "Special Thanks to:",
+            ""
+            "Einar Forselv (Lead `arcade` Developer)",
+            "Gökçe Çimen (Original Artist of Banjo Frog)",
+            "Python Discord Community",
             "",
             "Thank you for playing!",
         ]
@@ -41,6 +55,13 @@ class CreditsView(arcade.View):
 
         self.text_y = -self.num_lines * 30
         self.scroll_speed = 50
+        self.ost_player = arcade.play_sound(
+            arcade.sound.load_sound(
+                "sounds/The Banjo Frog's Lament.mp3",
+                streaming=True
+            ),
+            loop=True
+        )
 
     def on_draw(self) -> None:
         self.clear()
@@ -86,3 +107,4 @@ class CreditsView(arcade.View):
 
         if symbol == arcade.key.ESCAPE:
             self.window.show_view(StartMenuView())
+            arcade.stop_sound(self.ost_player) # type: ignore

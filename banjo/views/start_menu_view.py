@@ -17,6 +17,10 @@ class StartMenuView(arcade.View):
         The UI manager that handles the GUI elements in the menu view.
     `layout` : arcade.gui.UILayout
         The layout that contains the buttons and other UI elements in the menu view.
+    `game_view` : banjo.views.GameView
+        The game view that is displayed when the player starts the game.
+    `ost_player` : pyglet.media.Player
+        The original soundtrack player in the menu view.
     """
     def __init__(self) -> None:
         """ Initialize the menu view.
@@ -28,6 +32,9 @@ class StartMenuView(arcade.View):
         self.manager = arcade.gui.UIManager()
         self.layout = self.setup_layout()
         self.game_view = GameView()
+        self.ost_player = arcade.play_sound(
+            arcade.sound.load_sound("sounds/Downstream Rampage.mp3", streaming=True)
+        )
 
     def setup_buttons(self) -> list[arcade.gui.UIFlatButton]:
         """ Setup the buttons for the menu view.
@@ -51,12 +58,14 @@ class StartMenuView(arcade.View):
         def on_click_start_button(event):
             self.game_view.setup()
             self.window.show_view(self.game_view)
+            arcade.stop_sound(self.ost_player) # type: ignore
 
         @credits_button.event("on_click")
         def on_click_credits_button(event):
             from banjo.views import CreditsView
 
             self.window.show_view(CreditsView())
+            arcade.stop_sound(self.ost_player) # type: ignore
 
         @quit_button.event("on_click")
         def on_click_quit_button(event):

@@ -3,15 +3,16 @@ from __future__ import annotations
 __all__ = ["GameView"]
 
 import arcade
+from arcade.gui import UIView
 from banjo.characters import Banjo, Soldier1, Platoon
 from banjo.resources.game_constants import LEFT_FACING, RIGHT_FACING
 from banjo.resources.level_maps import TILE_MAP, load_scene, load_platforms
 import random
 
 
-class GameView(arcade.View):
+class GameView(UIView):
     """`banjo.views.GameView` is the class that represents the game view
-    where the game is displayed. It is a subclass of `arcade.View` and
+    where the game is displayed. It is a subclass of `arcade.UIView` and
     has additional functionality to handle player input and game logic.
 
     Attributes
@@ -84,7 +85,7 @@ class GameView(arcade.View):
 
         # Initialize the player and NPC
         self.player = Banjo()
-        self.soldiers: Platoon = Platoon([Soldier1() for _ in range(2)])
+        self.soldiers: Platoon = Platoon([Soldier1() for _ in range(3)])
 
         # Set the initial position of the player and soldiers
         self.player.center_x = 2400
@@ -111,6 +112,37 @@ class GameView(arcade.View):
         for i, soldier in enumerate(self.soldiers):
             self.scene.add_sprite(f"BRAVO-[1-{i}]", soldier)
 
+    def setup_hud(self) -> None:
+        """ Set up the heads-up display (HUD) for the game view:
+        - Draw the player's health bar.
+        """
+        bar_x = self.player.position[0]
+        bar_y = self.player.position[1] + 60
+
+        arcade.draw_lbwh_rectangle_filled(
+            bar_x - 55,
+            bar_y - 13,
+            110,
+            10,
+            arcade.color.BLACK
+        )
+
+        # Smoothly interpolate the color based on HP
+        if self.player.hp > self.player.max_hp * 0.65:
+            color = arcade.color.GREEN
+        elif self.player.hp > self.player.max_hp * 0.25:
+            color = arcade.color.YELLOW
+        else:
+            color = arcade.color.RED
+
+        arcade.draw_lbwh_rectangle_filled(
+            bar_x - 50,
+            bar_y - 10,
+            100 * self.player.hp / self.player.max_hp,
+            4,
+            color
+        )
+
     def check_end_level(self) -> bool:
         """ Check if the level has ended.
 
@@ -128,6 +160,7 @@ class GameView(arcade.View):
         self.clear()
         self.camera.use()
         self.scene.draw()
+        self.setup_hud()
 
     def handle_player_controls(self) -> None:
         """ Handle player controls.
