@@ -36,7 +36,7 @@ class Platoon(arcade.SpriteList):
     def __init__(
             self,
             soldiers: list[SOLDIER_TYPE],
-            max_soldier_distance: int=800
+            max_soldier_distance: int = 800
         ) -> None:
         """ Initialize the platoon with a list of soldiers.
         """
@@ -94,7 +94,7 @@ class Platoon(arcade.SpriteList):
 
     def update(
             self,
-            delta_time: float=1/60,
+            delta_time: float = 1/60,
             *args,
             **kwargs
         ) -> None:

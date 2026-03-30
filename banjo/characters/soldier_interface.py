@@ -653,7 +653,7 @@ class Soldier(arcade.Sprite):
 
     def update_animation(
             self,
-            delta_time: float=1/60,
+            delta_time: float = 1/60,
             *args,
             **kwargs
         ) -> None:
@@ -669,7 +669,7 @@ class Soldier(arcade.Sprite):
 
     def update(
             self,
-            delta_time: float=1/60,
+            delta_time: float = 1/60,
             *args,
             **kwargs
         ) -> None:

@@ -35,7 +35,7 @@ class CreditsView(arcade.View):
             "Developed by:"
             "",
             "Amir Ali Malekani Nezhad",
-            "Md. Raisul Hasan Shahrukh",
+            "Davinder Jolly",
             "",
             "Soundtrack by:",
             "",
